@@ -509,8 +509,8 @@ const TypeformQuiz: React.FC = () => {
                 onClick={() => handleOptionSelect(option.id, option.text)}
                 className={`w-full text-left p-3 rounded-md transition-colors duration-200 ${
                   answers[question.id] === option.id
-                    ? "bg-purple-700/70 border border-purple-500"
-                    : "bg-purple-900/40 border border-purple-800/30 hover:bg-purple-800/50"
+                    ? "bg-[#222428]/50 text-white/70 cursor-not-allowed"
+                    : "bg-[#222428] text-white hover:bg-[#2a2d33]"
                 } text-white`}
               >
                 <div className="flex items-center">
@@ -591,7 +591,7 @@ const TypeformQuiz: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-900 to-purple-950 flex justify-center items-center relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-[#2a2d33] to-[#222428]  flex justify-center items-center relative overflow-hidden">
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Background gradient shapes */}
@@ -599,22 +599,6 @@ const TypeformQuiz: React.FC = () => {
         <div className="absolute bottom-1/3 -right-20 w-80 h-80 rounded-full bg-purple-600/10 blur-3xl"></div>
 
         {/* Subtle animated particles */}
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full bg-white/10 blur-sm"
-            style={{
-              width: `${Math.random() * 8 + 4}px`,
-              height: `${Math.random() * 8 + 4}px`,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animation: `float ${
-                Math.random() * 10 + 10
-              }s infinite ease-in-out`,
-              animationDelay: `${Math.random() * 5}s`,
-            }}
-          />
-        ))}
       </div>
 
       {/* Main container */}
@@ -692,8 +676,8 @@ const TypeformQuiz: React.FC = () => {
                   disabled={isSubmitting}
                   className={`flex items-center gap-1 py-2 px-4 rounded-md ${
                     isSubmitting
-                      ? "bg-purple-700/50 text-white/70 cursor-not-allowed"
-                      : "bg-purple-700 text-white hover:bg-purple-600"
+                      ? "bg-[#222428]/50 text-white/70 cursor-not-allowed"
+                      : "bg-[#222428] text-white hover:bg-[#2a2d33]"
                   } transition-colors`}
                 >
                   {isSubmitting ? (
@@ -719,7 +703,7 @@ const TypeformQuiz: React.FC = () => {
 
         {/* Powered by (like Typeform) */}
         <div className="absolute bottom-2 right-2 text-white/40 text-xs">
-          Powered by Edición Persuasiva
+          Powered by Decode Next
         </div>
       </div>
     </div>

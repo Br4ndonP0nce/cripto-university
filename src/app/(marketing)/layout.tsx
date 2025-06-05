@@ -1,9 +1,9 @@
 // src/app/(marketing)/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Header from "@/components/ui/Header";
-import { VideoPreloadProvider } from "@/contexts/VideoPreloadContent";
 
+import { VideoPreloadProvider } from "@/contexts/VideoPreloadContent";
+import Navbar from "@/components/ui/Nav/Nav";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Edición Persuasiva - Gana $2,000+ editando videos con pocos clientes",
+  title: "Demo Landing + CRM",
   description:
-    "Para editores que quieran lograr más y cobrar mucho más. Aprende cómo ganar mínimo $2,000 dólares mensuales editando y con pocos clientes.",
+    "Demo de una landing page con un CRM integrado para capturar leads y gestionar clientes potenciales. Cloud+",
 };
 
 export default function MarketingLayout({
@@ -26,13 +26,9 @@ export default function MarketingLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <VideoPreloadProvider>
-      <div
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Header />
-        {children}
-      </div>
-    </VideoPreloadProvider>
+    <div className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <Navbar />
+      {children}
+    </div>
   );
 }

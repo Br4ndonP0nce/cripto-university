@@ -127,16 +127,16 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
       {/* Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 flex flex-col w-64 bg-purple-900 text-white transform transition-transform ease-in-out duration-300 z-50
+        className={`fixed inset-y-0 left-0 flex flex-col w-64 bg-[#222428] text-white transform transition-transform ease-in-out duration-300 z-50
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           md:relative md:translate-x-0`}
       >
         {/* Sidebar header */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-purple-800">
+        <div className="flex items-center justify-between h-16 px-4 border-b border-white/50">
           <Link href="/">
             <div className="flex items-center">
               <Image
-                src="/image/logo.jpg"
+                src="/image/logo.png"
                 alt="Edición Persuasiva"
                 width={120}
                 height={30}
@@ -153,10 +153,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </div>
 
         {/* User info */}
-        <div className="px-4 py-3 border-b border-purple-800">
+        <div className="px-4 py-3 border-b border-white/50">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 rounded-full bg-purple-700 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-gray-500 flex items-center justify-center">
                 <span className="text-sm font-medium text-white">
                   {userProfile?.displayName?.charAt(0)?.toUpperCase() ||
                     userProfile?.email?.charAt(0)?.toUpperCase() ||
@@ -187,8 +187,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 href={item.href}
                 className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
                   isActive(item.href)
-                    ? "bg-purple-800 text-white"
-                    : "text-purple-200 hover:bg-purple-700 hover:text-white"
+                    ? "bg-[#212A37] text-white"
+                    : "text-purple-200 hover:bg-[#212A37] hover:text-white"
                 }`}
                 onClick={() => isMobile && setSidebarOpen(false)}
               >
@@ -206,7 +206,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         </nav>
 
         {/* Sidebar footer */}
-        <div className="flex-shrink-0 flex border-t border-purple-800 p-4">
+        <div className="flex-shrink-0 flex border-t border-white/50 p-4">
           <button
             onClick={handleSignOut}
             className="w-full flex items-center justify-center px-4 py-2 text-sm text-purple-200 rounded-md hover:bg-purple-700 hover:text-white"

@@ -59,12 +59,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-900 to-purple-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-b from-[#2a2d33] to-[#222428] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <div className="text-white text-2xl font-bold">
-            EDICIÓN PERSUASIVA
-          </div>
+          <div className="text-white text-2xl font-bold">CRM LOGIN</div>
         </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-white">
           Acceso Admin
@@ -90,7 +88,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-gray-500 focus:border-gray-700"
                   placeholder="tu-email@ejemplo.com"
                 />
               </div>
@@ -112,7 +110,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-gray-500 focus:border-gray-700"
                 />
               </div>
             </div>
@@ -129,25 +127,14 @@ export default function LoginPage() {
                 disabled={isLoading}
                 className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
                   isLoading
-                    ? "bg-purple-400 cursor-not-allowed"
-                    : "bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                    ? "bg-[#222428]/40 text-white/60 cursor-not-allowed opacity-60"
+                    : "bg-[#222428] text-white hover:bg-[#2f3239] transition-colors duration-200"
                 }`}
               >
                 {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
               </button>
             </div>
           </form>
-
-          <div className="mt-6">
-            <div className="text-center">
-              <a
-                href="/setup-admin"
-                className="text-sm text-purple-600 hover:text-purple-500"
-              >
-                ¿Primera vez? Configurar admin
-              </a>
-            </div>
-          </div>
         </div>
       </div>
     </div>
