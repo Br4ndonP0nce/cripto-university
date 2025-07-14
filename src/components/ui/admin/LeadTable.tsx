@@ -34,6 +34,8 @@ import {
   Edit2,
   FileText,
   Lock,
+  Building,
+  Briefcase,
 } from "lucide-react";
 
 interface EnhancedLeadTableProps {
@@ -148,6 +150,73 @@ export default function EnhancedLeadTable({
     }
   };
 
+  // NEW: Get business type from role field (which now contains business type)
+  const getBusinessTypeLabel = (role: string) => {
+    const businessTypes: Record<string, string> = {
+      agency: "Agencia Marketing",
+      ecommerce: "E-commerce",
+      saas: "SaaS/Tech",
+      consulting: "Consultoría",
+      real_estate: "Bienes Raíces",
+      education: "Educación",
+      health: "Salud/Wellness",
+      restaurant: "Restaurante",
+      retail: "Retail",
+      freelancer: "Freelancer",
+      startup: "Startup",
+      other: "Otro",
+    };
+    return businessTypes[role] || role;
+  };
+
+  // NEW: Get business type icon
+  const getBusinessTypeIcon = (role: string) => {
+    switch (role) {
+      case "agency":
+      case "consulting":
+        return <Briefcase className="h-3 w-3" />;
+      case "ecommerce":
+      case "retail":
+        return <Building className="h-3 w-3" />;
+      case "saas":
+        return <CreditCard className="h-3 w-3" />;
+      default:
+        return <Building className="h-3 w-3" />;
+    }
+  };
+
+  // NEW: Updated investment analysis for $200 system
+  const getInvestmentLevel = (investment: string) => {
+    if (
+      investment.toLowerCase().includes("claro") ||
+      investment.toLowerCase().includes("cuento con la inversión")
+    ) {
+      return {
+        level: "high",
+        label: "🔥 Alto",
+        color: "bg-red-100 text-red-700",
+        description: "Cuenta con $200",
+      };
+    } else if (
+      investment.toLowerCase().includes("puedo conseguirla") ||
+      investment.toLowerCase().includes("puedo conseguir")
+    ) {
+      return {
+        level: "medium",
+        label: "🟡 Medio",
+        color: "bg-yellow-100 text-yellow-700",
+        description: "Puede conseguir $200",
+      };
+    } else {
+      return {
+        level: "low",
+        label: "❄️ Bajo",
+        color: "bg-blue-100 text-blue-700",
+        description: "No cuenta con $200",
+      };
+    }
+  };
+
   const formatDate = (timestamp: any) => {
     if (!timestamp) return "N/A";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -226,8 +295,9 @@ export default function EnhancedLeadTable({
             <TableRow>
               <TableHead>Contacto</TableHead>
               <TableHead>Estado</TableHead>
-              <TableHead>Inversion/Ventas</TableHead>
-              <TableHead>Rol/Software</TableHead>
+              <TableHead>Inversión ($200)</TableHead>
+              <TableHead>Tipo de Negocio</TableHead>
+              <TableHead>Descripción</TableHead>
               <TableHead>Creado</TableHead>
               <TableHead>Acciones</TableHead>
             </TableRow>
@@ -239,6 +309,7 @@ export default function EnhancedLeadTable({
               const allowedTransitions = getAllowedStatusTransitions(
                 lead.status
               );
+              const investmentData = getInvestmentLevel(lead.investment);
 
               return (
                 <TableRow
@@ -285,38 +356,15 @@ export default function EnhancedLeadTable({
 
                   <TableCell>
                     <div className="space-y-2">
-                      {/* Investment Info (Lead Temperature) - Always Show */}
+                      {/* Investment Info for $200 system */}
                       <div className="space-y-1">
-                        <div className="text-xs text-gray-500">Inversión:</div>
-                        <div className="text-xs text-gray-600 max-w-xs truncate">
-                          {lead.investment}
-                        </div>
                         <div
-                          className={`text-xs px-2 py-1 rounded-full font-medium ${
-                            lead.investment
-                              .toLowerCase()
-                              .includes("sí, tengo acceso") ||
-                            lead.investment
-                              .toLowerCase()
-                              .includes("tengo dinero")
-                              ? "bg-red-100 text-red-700" // Hot lead
-                              : lead.investment
-                                  .toLowerCase()
-                                  .includes("puedo conseguirlo")
-                              ? "bg-yellow-100 text-yellow-700" // Warm lead
-                              : "bg-blue-100 text-blue-700" // Cold lead
-                          }`}
+                          className={`text-xs px-2 py-1 rounded-full font-medium w-fit ${investmentData.color}`}
                         >
-                          {lead.investment
-                            .toLowerCase()
-                            .includes("sí, tengo acceso") ||
-                          lead.investment.toLowerCase().includes("tengo dinero")
-                            ? "🔥Alto"
-                            : lead.investment
-                                .toLowerCase()
-                                .includes("puedo conseguirlo")
-                            ? "🟡 Medio"
-                            : "❄️ Bajo"}
+                          {investmentData.label}
+                        </div>
+                        <div className="text-xs text-gray-600">
+                          {investmentData.description}
                         </div>
                       </div>
 
@@ -376,13 +424,29 @@ export default function EnhancedLeadTable({
                   </TableCell>
 
                   <TableCell>
-                    <div className="text-sm">
-                      <div className="font-medium">{lead.role}</div>
-                      <div className="text-xs text-gray-500">
-                        {lead.software}
+                    <div className="flex items-center gap-2">
+                      {getBusinessTypeIcon(lead.role)}
+                      <div className="text-sm">
+                        <div className="font-medium">
+                          {getBusinessTypeLabel(lead.role)}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {/* Show a truncated version of the original business text */}
+                          {lead.role && lead.role.length > 20
+                            ? `${lead.role.substring(0, 20)}...`
+                            : lead.role}
+                        </div>
                       </div>
-                      <div className="text-xs text-gray-500">
-                        Nivel: {lead.level}
+                    </div>
+                  </TableCell>
+
+                  <TableCell>
+                    <div className="text-sm max-w-xs">
+                      {/* Show business description from the "why" field or "clients" field */}
+                      <div className="text-gray-700 line-clamp-2">
+                        {lead.why && lead.why.length > 100
+                          ? `${lead.why.substring(0, 100)}...`
+                          : lead.why || "Sin descripción"}
                       </div>
                     </div>
                   </TableCell>

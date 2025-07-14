@@ -25,6 +25,11 @@ import {
   Phone,
   Calendar,
   Trash2,
+  Building,
+  DollarSign,
+  MessageSquare,
+  Briefcase,
+  CreditCard,
 } from "lucide-react";
 
 export default function LeadDetailsPage() {
@@ -93,6 +98,118 @@ export default function LeadDetailsPage() {
     }
   };
 
+  // NEW: Get business type from role field
+  const getBusinessTypeDetails = (role: string) => {
+    const businessTypes: Record<
+      string,
+      { label: string; icon: React.ReactNode; color: string }
+    > = {
+      agency: {
+        label: "Agencia de Marketing Digital",
+        icon: <Briefcase className="h-4 w-4" />,
+        color: "bg-purple-100 text-purple-800",
+      },
+      ecommerce: {
+        label: "E-commerce / Tienda Online",
+        icon: <Building className="h-4 w-4" />,
+        color: "bg-blue-100 text-blue-800",
+      },
+      saas: {
+        label: "Software / SaaS / Tecnología",
+        icon: <CreditCard className="h-4 w-4" />,
+        color: "bg-green-100 text-green-800",
+      },
+      consulting: {
+        label: "Consultoría / Servicios Profesionales",
+        icon: <Briefcase className="h-4 w-4" />,
+        color: "bg-amber-100 text-amber-800",
+      },
+      real_estate: {
+        label: "Bienes Raíces / Inmobiliaria",
+        icon: <Building className="h-4 w-4" />,
+        color: "bg-teal-100 text-teal-800",
+      },
+      education: {
+        label: "Educación / Cursos Online",
+        icon: <Building className="h-4 w-4" />,
+        color: "bg-indigo-100 text-indigo-800",
+      },
+      health: {
+        label: "Salud / Medicina / Wellness",
+        icon: <Building className="h-4 w-4" />,
+        color: "bg-red-100 text-red-800",
+      },
+      restaurant: {
+        label: "Restaurante / Comida",
+        icon: <Building className="h-4 w-4" />,
+        color: "bg-orange-100 text-orange-800",
+      },
+      retail: {
+        label: "Retail / Tienda Física",
+        icon: <Building className="h-4 w-4" />,
+        color: "bg-pink-100 text-pink-800",
+      },
+      freelancer: {
+        label: "Freelancer / Profesional Independiente",
+        icon: <Briefcase className="h-4 w-4" />,
+        color: "bg-cyan-100 text-cyan-800",
+      },
+      startup: {
+        label: "Startup / Emprendimiento Nuevo",
+        icon: <Building className="h-4 w-4" />,
+        color: "bg-violet-100 text-violet-800",
+      },
+      other: {
+        label: "Otro Tipo de Negocio",
+        icon: <Building className="h-4 w-4" />,
+        color: "bg-gray-100 text-gray-800",
+      },
+    };
+
+    return (
+      businessTypes[role] || {
+        label: role || "No especificado",
+        icon: <Building className="h-4 w-4" />,
+        color: "bg-gray-100 text-gray-800",
+      }
+    );
+  };
+
+  // NEW: Get investment level analysis for $200 system
+  const getInvestmentAnalysis = (investment: string) => {
+    if (
+      investment.toLowerCase().includes("claro") ||
+      investment.toLowerCase().includes("cuento con la inversión")
+    ) {
+      return {
+        level: "Alto Potencial",
+        description: "Cuenta con la inversión de $200 USD",
+        color: "bg-red-100 text-red-800",
+        icon: <DollarSign className="h-4 w-4 text-red-600" />,
+        priority: "🔥 ALTA PRIORIDAD",
+      };
+    } else if (
+      investment.toLowerCase().includes("puedo conseguirla") ||
+      investment.toLowerCase().includes("puedo conseguir")
+    ) {
+      return {
+        level: "Potencial Medio",
+        description: "Puede conseguir la inversión de $200 USD",
+        color: "bg-yellow-100 text-yellow-800",
+        icon: <DollarSign className="h-4 w-4 text-yellow-600" />,
+        priority: "🟡 PRIORIDAD MEDIA",
+      };
+    } else {
+      return {
+        level: "Bajo Potencial",
+        description: "No cuenta con la inversión de $200 USD",
+        color: "bg-blue-100 text-blue-800",
+        icon: <DollarSign className="h-4 w-4 text-blue-600" />,
+        priority: "❄️ PRIORIDAD BAJA",
+      };
+    }
+  };
+
   const formatDate = (timestamp: any) => {
     if (!timestamp) return "N/A";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
@@ -130,6 +247,9 @@ export default function LeadDetailsPage() {
     );
   }
 
+  const businessDetails = getBusinessTypeDetails(lead.role);
+  const investmentAnalysis = getInvestmentAnalysis(lead.investment);
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -162,15 +282,21 @@ export default function LeadDetailsPage() {
             <div>
               <CardTitle className="text-2xl">{lead.name}</CardTitle>
               <CardDescription>
-                <Badge className={`mt-2 ${getStatusColor(lead.status)}`}>
-                  {lead.status === "lead"
-                    ? "Nuevo Lead"
-                    : lead.status === "onboarding"
-                    ? "En Onboarding"
-                    : lead.status === "sale"
-                    ? "Venta Realizada"
-                    : "Rechazado"}
-                </Badge>
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge className={`${getStatusColor(lead.status)}`}>
+                    {lead.status === "lead"
+                      ? "Nuevo Lead"
+                      : lead.status === "onboarding"
+                      ? "En Onboarding"
+                      : lead.status === "sale"
+                      ? "Venta Realizada"
+                      : "Rechazado"}
+                  </Badge>
+                  {/* NEW: Investment Priority Badge */}
+                  <Badge className={investmentAnalysis.color}>
+                    {investmentAnalysis.priority}
+                  </Badge>
+                </div>
               </CardDescription>
             </div>
             <Avatar className="h-12 w-12">
@@ -228,6 +354,23 @@ export default function LeadDetailsPage() {
                     </a>
                   )}
                 </div>
+                {/* NEW: WhatsApp quick action */}
+                <div className="flex items-center">
+                  <MessageSquare className="h-4 w-4 text-green-500 mr-2" />
+                  <a
+                    href={`https://wa.me/${lead.phone?.replace(
+                      /[^\d]/g,
+                      ""
+                    )}?text=Hola ${
+                      lead.name
+                    }, te contacto desde el equipo de Full Send respecto a tu consulta sobre nuestro sistema.`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-green-600 hover:underline text-sm"
+                  >
+                    Contactar por WhatsApp
+                  </a>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -268,40 +411,67 @@ export default function LeadDetailsPage() {
           </CardContent>
         </Card>
 
-        {/* Details sidebar */}
+        {/* Details sidebar - UPDATED */}
         <Card>
           <CardHeader>
-            <CardTitle>Detalles</CardTitle>
+            <CardTitle>Información del Negocio</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* NEW: Business Type */}
             <div>
-              <div className="text-sm text-gray-500 mb-1">Rol</div>
-              <div className="font-medium">{lead.role}</div>
+              <div className="text-sm text-gray-500 mb-1">Tipo de Negocio</div>
+              <div className="flex items-center gap-2">
+                {businessDetails.icon}
+                <div>
+                  <div className="font-medium">{businessDetails.label}</div>
+                  <Badge className={`${businessDetails.color} text-xs mt-1`}>
+                    {lead.role?.toUpperCase()}
+                  </Badge>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <div className="text-sm text-gray-500 mb-1">Nivel de Edición</div>
-              <div className="font-medium">{lead.level}</div>
-            </div>
-
-            <div>
-              <div className="text-sm text-gray-500 mb-1">Software</div>
-              <div className="font-medium">{lead.software}</div>
-            </div>
-
+            {/* NEW: Investment Analysis for $200 system */}
             <div>
               <div className="text-sm text-gray-500 mb-1">
-                Origen de Clientes
+                Capacidad de Inversión ($200 USD)
               </div>
-              <div className="font-medium">{lead.clients}</div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  {investmentAnalysis.icon}
+                  <div>
+                    <div className="font-medium">
+                      {investmentAnalysis.level}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {investmentAnalysis.description}
+                    </div>
+                  </div>
+                </div>
+                <Badge className={investmentAnalysis.color}>
+                  {investmentAnalysis.priority}
+                </Badge>
+                {/* Full investment text */}
+                <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                  "{lead.investment}"
+                </div>
+              </div>
             </div>
 
-            <div>
-              <div className="text-sm text-gray-500 mb-1">
-                Capacidad de Inversión
+            {/* Legacy fields (kept for backward compatibility) */}
+            {lead.level && lead.level !== "business" && (
+              <div>
+                <div className="text-sm text-gray-500 mb-1">Nivel</div>
+                <div className="font-medium">{lead.level}</div>
               </div>
-              <div className="font-medium">{lead.investment}</div>
-            </div>
+            )}
+
+            {lead.software && lead.software !== "system" && (
+              <div>
+                <div className="text-sm text-gray-500 mb-1">Software</div>
+                <div className="font-medium">{lead.software}</div>
+              </div>
+            )}
           </CardContent>
           <CardFooter className="flex justify-between border-t pt-4">
             <Button
@@ -314,19 +484,41 @@ export default function LeadDetailsPage() {
         </Card>
       </div>
 
+      {/* NEW: Business Description Card */}
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle>Motivación</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Building className="h-5 w-5" />
+            Descripción del Negocio
+          </CardTitle>
           <CardDescription>
-            Razón por la que desean acceder a la formación
+            Detalles sobre el negocio y objetivos con el sistema
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="bg-gray-50 p-4 rounded-lg whitespace-pre-wrap">
-            {lead.why}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="whitespace-pre-wrap text-gray-800">
+              {lead.why ||
+                lead.clients ||
+                "No se proporcionó descripción del negocio"}
+            </div>
           </div>
+          {/* Show both fields if they're different */}
+          {lead.why && lead.clients && lead.why !== lead.clients && (
+            <div className="mt-4">
+              <div className="text-sm text-gray-500 mb-2">
+                Información adicional:
+              </div>
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="whitespace-pre-wrap text-gray-800">
+                  {lead.clients}
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
+
       <SalesInfoComponent
         lead={lead}
         isLoading={isLoading}

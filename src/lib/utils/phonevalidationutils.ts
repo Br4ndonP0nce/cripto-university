@@ -543,7 +543,7 @@ export const validateEmail = (email: string): boolean => {
   export const generateWhatsAppLink = (
     message: string = "Hola, acabo de aplicar a Edición Persuasiva"
   ): string => {
-    const teamWhatsAppNumber = "5213336621828"; // Team's WhatsApp number
+    const teamWhatsAppNumber = "5522838461"; // Team's WhatsApp number
     const encodedMessage = encodeURIComponent(message);
     
     return `https://wa.me/${teamWhatsAppNumber}?text=${encodedMessage}`;

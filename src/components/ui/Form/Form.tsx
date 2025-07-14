@@ -2,9 +2,13 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
-import { ChevronRight, ChevronLeft } from "lucide-react";
+import { ChevronRight, ChevronLeft, ChevronDown } from "lucide-react";
 import { addLead } from "@/lib/firebase/db";
+import { toast } from "sonner";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 import {
   validateEmail,
@@ -14,14 +18,9 @@ import {
   COUNTRY_VALIDATIONS,
   PhoneValidationResult,
 } from "@/lib/utils/phonevalidationutils";
+
 // Question types
-type QuestionType =
-  | "text"
-  | "email"
-  | "phone"
-  | "select"
-  | "multi-select"
-  | "textarea";
+type QuestionType = "text" | "email" | "phone" | "select" | "textarea";
 
 interface Option {
   id: string;
@@ -37,7 +36,7 @@ interface Question {
   options?: Option[];
 }
 
-// Define our form questions
+// Updated questions focused on business qualification
 const questions: Question[] = [
   {
     id: "name",
@@ -50,7 +49,7 @@ const questions: Question[] = [
     text: "¿Cuál es tu mejor correo?",
     type: "email",
     required: true,
-    description: "Con este correo te meteremos a la comunidad si accedes.",
+    description: "Para enviarte acceso y actualizaciones del sistema.",
   },
   {
     id: "phone",
@@ -60,98 +59,109 @@ const questions: Question[] = [
     description: "Para contactarte de forma personalizada.",
   },
   {
-    id: "role",
-    text: "¿Cuál opción es la que mejor te describe?",
+    id: "business",
+    text: "¿De qué va tu negocio?",
     type: "select",
     required: true,
     options: [
       {
-        id: "professional",
-        text: "Soy editor/a de video y es mi principal fuente de ingresos",
+        id: "agency",
+        text: "Agencia de marketing digital / publicidad",
       },
       {
-        id: "part-time",
-        text: "Soy editor/a de video pero mis ingresos provienen de otras fuente",
-      },
-      { id: "beginner", text: "Aun no edito video pero deseo aprender" },
-    ],
-  },
-  {
-    id: "level",
-    text: "¿Qué nivel de edición consideras que tienes?",
-    type: "select",
-    required: true,
-    options: [
-      { id: "expert", text: "Muy alto" },
-      { id: "advanced", text: "Alto" },
-      { id: "intermediate", text: "Medio" },
-      { id: "beginner", text: "Principiante" },
-      { id: "none", text: "No sé nada de edición" },
-    ],
-  },
-  {
-    id: "software",
-    text: "¿Con qué programa editas?",
-    type: "select",
-    required: true,
-    options: [
-      { id: "adobe", text: "La Suite de Adobe (Premiere pro o After Effects)" },
-      { id: "davinci", text: "DaVinci Resolve" },
-      { id: "capcut", text: "CapCut" },
-      { id: "filmora", text: "Filmora" },
-      { id: "other", text: "Otro" },
-    ],
-  },
-  {
-    id: "clients",
-    text: "¿Cómo consigues clientes de edición cada mes?",
-    type: "select",
-    required: true,
-    options: [
-      {
-        id: "outbound",
-        text: "Escribo mensajes a cuentas ofreciendo mis servicios todos los días.",
+        id: "ecommerce",
+        text: "E-commerce / Tienda online",
       },
       {
-        id: "inbound",
-        text: "Creo contenido y recibo mensajes de prospectos todos los días.",
+        id: "saas",
+        text: "Software / SaaS / Tecnología",
       },
       {
-        id: "referrals",
-        text: "Conocidos y amigos recomiendan mis servicios.",
+        id: "consulting",
+        text: "Consultoría / Servicios profesionales",
       },
       {
-        id: "struggling",
-        text: "No tengo clientes, he batallado mucho con eso.",
+        id: "real_estate",
+        text: "Bienes raíces / Inmobiliaria",
       },
-      { id: "not-editor", text: "No me dedico a la edición de video." },
+      {
+        id: "education",
+        text: "Educación / Cursos online",
+      },
+      {
+        id: "health",
+        text: "Salud / Medicina / Wellness",
+      },
+      {
+        id: "restaurant",
+        text: "Restaurante / Comida",
+      },
+      {
+        id: "retail",
+        text: "Retail / Tienda física",
+      },
+      {
+        id: "freelancer",
+        text: "Freelancer / Profesional independiente",
+      },
+      {
+        id: "startup",
+        text: "Startup / Emprendimiento nuevo",
+      },
+      {
+        id: "other",
+        text: "Otro tipo de negocio",
+      },
     ],
   },
   {
     id: "investment",
-    text: "¿Estás dispuesta/o a invertir entre $800 y $1,300 dólares en tu crecimiento exponencial como editor/a?",
+    text: "¿Cómo te suena tener acceso de por vida a la cantidad de forms que necesites y todo el sistema por $200 USD?",
     type: "select",
     required: true,
+    description: "Acceso completo y permanente a nuestra plataforma.",
     options: [
-      { id: "yes", text: "Sí, tengo acceso a ese monto y estoy dispuesta/o" },
-      { id: "maybe", text: "No tengo ese monto ahora, pero puedo conseguirlo" },
-      { id: "no", text: "Definitivamente no" },
+      {
+        id: "yes",
+        text: "¡Claro! Cuento con la inversión",
+      },
+      {
+        id: "maybe",
+        text: "No cuento con la inversión pero puedo conseguirla",
+      },
+      {
+        id: "no",
+        text: "Definitivamente no cuento con la inversión",
+      },
     ],
   },
   {
-    id: "why",
-    text: "Cuéntanos por qué deberíamos darte acceso a esta formación:",
+    id: "description",
+    text: "Platícame un poco de lo que haces",
     type: "textarea",
     required: true,
     description:
-      "La formación es exclusiva y queremos a personas MUY COMPROMETIDAS.",
+      "Cuéntanos sobre tu negocio, tus objetivos y cómo planeas usar nuestro sistema.",
   },
 ];
 
-// Generate country codes from COUNTRY_VALIDATIONS (single source of truth)
-const countryCodes = COUNTRY_VALIDATIONS.filter((c) => c.code !== "+999") // Exclude fallback
+// Guerrilla marketing messages for sonner notifications
+const guerrillaMessages = [
+  "Esta podría ser la experiencia para tus clientes y para ti... muy fácil, muy personalizable, 100% tuya",
+  "Imagina tener este nivel de personalización en todos tus formularios",
+  "Esto es solo una muestra de lo que puedes crear para tu negocio",
+  "Formularios que convierten como este, ¿te imaginas el potencial?",
+  "Cada pregunta optimizada para maximizar conversiones",
+  "Tu marca, tu estilo, tus reglas. Así de simple",
+  "Validaciones robustas, experiencia premium. Todo tuyo por $200",
+  "¿Ya te imaginas esto con los colores y logo de tu empresa?",
+  "Sistema completo, sin límites, sin mensualidades. Una sola vez",
+  "Formularios que se sienten premium, porque tu negocio lo vale",
+];
+
+// Generate country codes from COUNTRY_VALIDATIONS (same as before)
+const countryCodes = COUNTRY_VALIDATIONS.filter((c) => c.code !== "+999")
   .sort((a, b) => {
-    // Prioritize Latin America and Caribbean
     const latinAmericanCodes = [
       "+52",
       "+55",
@@ -176,7 +186,6 @@ const countryCodes = COUNTRY_VALIDATIONS.filter((c) => c.code !== "+999") // Exc
     const aIsLA = latinAmericanCodes.includes(a.code);
     const bIsLA = latinAmericanCodes.includes(b.code);
 
-    // Handle +1 countries (NANP) - prioritize Caribbean and North America
     const isCaribbean = (country: string) =>
       [
         "Dominican Republic",
@@ -196,21 +205,18 @@ const countryCodes = COUNTRY_VALIDATIONS.filter((c) => c.code !== "+999") // Exc
       return a.country.localeCompare(b.country);
     }
 
-    // Latin America first
     if (aIsLA && !bIsLA && b.code !== "+1") return -1;
     if (!aIsLA && bIsLA && a.code !== "+1") return 1;
 
-    // Then +1 countries (Caribbean + North America)
     if (a.code === "+1" && !bIsLA) return -1;
     if (b.code === "+1" && !aIsLA) return 1;
 
-    // Finally alphabetical
     return a.country.localeCompare(b.country);
   })
   .map((c) => ({ code: c.code, country: c.country }));
 
 // Main component
-const TypeformQuiz: React.FC = () => {
+const BusinessLeadForm: React.FC = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | null>>({});
   const [selectedCode, setSelectedCode] = useState("+52"); // Default to Mexico
@@ -224,6 +230,58 @@ const TypeformQuiz: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Guerrilla marketing with Sonner
+  const guerrillaTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Start guerrilla marketing notifications using Sonner
+  useEffect(() => {
+    const startGuerrillaMarketing = () => {
+      const showRandomMessage = () => {
+        if (!isSubmitted && !isSubmitting) {
+          const randomMessage =
+            guerrillaMessages[
+              Math.floor(Math.random() * guerrillaMessages.length)
+            ];
+          toast(randomMessage, {
+            duration: 4000,
+            style: {
+              background: "rgba(16, 185, 129, 0.9)",
+              color: "white",
+              border: "1px solid rgba(16, 185, 129, 0.3)",
+            },
+            className: "border-emerald-500/30",
+          });
+        }
+      };
+
+      // Show first message after 5 seconds
+      const initialTimer = setTimeout(() => {
+        showRandomMessage();
+
+        // Then show a message every 8 seconds
+        guerrillaTimeoutRef.current = setInterval(showRandomMessage, 8000);
+      }, 5000);
+
+      return () => {
+        clearTimeout(initialTimer);
+        if (guerrillaTimeoutRef.current) {
+          clearInterval(guerrillaTimeoutRef.current);
+        }
+      };
+    };
+
+    return startGuerrillaMarketing();
+  }, [isSubmitted, isSubmitting]);
+
+  // Clean up notifications on unmount
+  useEffect(() => {
+    return () => {
+      if (guerrillaTimeoutRef.current) {
+        clearInterval(guerrillaTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Focus the input field when the question changes
   useEffect(() => {
@@ -317,7 +375,6 @@ const TypeformQuiz: React.FC = () => {
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^\d]/g, "");
 
-    // Get current country validation
     const countryValidation = COUNTRY_VALIDATIONS.find(
       (c) => c.code === selectedCode
     );
@@ -329,7 +386,6 @@ const TypeformQuiz: React.FC = () => {
         [questions[currentQuestion].id]: fullNumber,
       });
 
-      // Real-time validation feedback
       if (value.length >= countryValidation.minLength) {
         const validation = validatePhone(value, selectedCode);
         if (!validation.isValid) {
@@ -371,6 +427,11 @@ const TypeformQuiz: React.FC = () => {
   // Handle form submission
   const handleSubmit = async () => {
     setIsSubmitting(true);
+
+    // Stop guerrilla marketing
+    if (guerrillaTimeoutRef.current) {
+      clearInterval(guerrillaTimeoutRef.current);
+    }
 
     // Validate all required fields
     for (let i = 0; i < questions.length; i++) {
@@ -417,17 +478,17 @@ const TypeformQuiz: React.FC = () => {
     }
 
     try {
-      // Format the lead data for Firebase
+      // Format the lead data for Firebase (updated fields)
       const leadData = {
         name: answers.name || "",
         email: answers.email || "",
         phone: answers.phone || "",
-        role: answers.role_text || answers.role || "",
-        level: answers.level_text || answers.level || "",
-        software: answers.software_text || answers.software || "",
-        clients: answers.clients_text || answers.clients || "",
+        role: answers.business_text || answers.business || "", // Using business instead of role
+        level: "business", // Set default since we removed level question
+        software: "system", // Set default since we removed software question
+        clients: answers.description || "", // Using description for clients field
         investment: answers.investment_text || answers.investment || "",
-        why: answers.why || "",
+        why: answers.description || "", // Using description for why field too
         status: "lead" as const,
       };
 
@@ -436,11 +497,22 @@ const TypeformQuiz: React.FC = () => {
       console.log("Lead successfully added with ID:", leadId);
 
       setIsSubmitted(true);
+
+      // Success toast
+      toast.success("¡Formulario enviado exitosamente!", {
+        description: "Nos pondremos en contacto contigo pronto.",
+        duration: 5000,
+      });
     } catch (err) {
       console.error("Error submitting form:", err);
       setError(
         "Hubo un error al enviar el formulario. Por favor intenta de nuevo."
       );
+
+      // Error toast
+      toast.error("Error al enviar el formulario", {
+        description: "Por favor intenta de nuevo.",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -462,13 +534,13 @@ const TypeformQuiz: React.FC = () => {
       case "text":
         return (
           <div className="w-full">
-            <input
+            <Input
               ref={inputRef}
               type="text"
               value={answers[question.id] || ""}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              className="w-full bg-transparent border-b-2 border-white/30 focus:border-white py-2 px-1 text-lg outline-none text-white transition-colors"
+              className="w-full bg-transparent border-0 border-b-2 border-emerald-500/30 focus:border-emerald-400 py-3 px-1 text-lg text-white transition-colors placeholder:text-gray-400 rounded-none focus-visible:ring-0"
               placeholder={
                 question.id === "name"
                   ? "Tu nombre completo"
@@ -481,7 +553,6 @@ const TypeformQuiz: React.FC = () => {
       case "email":
         const emailValue = answers[question.id] || "";
 
-        // Real-time email validation feedback
         const getEmailValidationState = (email: string) => {
           if (!email) return { state: "empty", message: "" };
 
@@ -550,27 +621,26 @@ const TypeformQuiz: React.FC = () => {
 
         return (
           <div className="w-full">
-            <input
+            <Input
               ref={inputRef}
               type="email"
               value={emailValue}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              className={`w-full bg-transparent border-b-2 ${
+              className={`w-full bg-transparent border-0 border-b-2 ${
                 emailValidation.state === "valid"
-                  ? "border-green-400 focus:border-green-300"
+                  ? "border-emerald-400 focus:border-emerald-300"
                   : emailValidation.state === "invalid"
                   ? "border-red-400 focus:border-red-300"
-                  : "border-white/30 focus:border-white"
-              } py-2 px-1 text-lg outline-none text-white transition-colors`}
+                  : "border-emerald-500/30 focus:border-emerald-400"
+              } py-3 px-1 text-lg text-white transition-colors placeholder:text-gray-400 rounded-none focus-visible:ring-0`}
               placeholder="ejemplo@correo.com"
             />
 
-            {/* Real-time email validation feedback */}
             {emailValue && (
               <div className="mt-2 text-xs">
                 {emailValidation.state === "valid" && (
-                  <span className="text-green-400 flex items-center gap-1">
+                  <span className="text-emerald-400 flex items-center gap-1">
                     <span>✅</span> {emailValidation.message}
                   </span>
                 )}
@@ -587,22 +657,18 @@ const TypeformQuiz: React.FC = () => {
               </div>
             )}
 
-            {/* Format example */}
-            <div className="text-xs text-white/40 mt-1">
+            <div className="text-xs text-gray-400 mt-1">
               Ejemplo: usuario@dominio.com
             </div>
           </div>
         );
 
       case "phone":
-        // ... rest of the phone case remains the same
         const phoneValue = answers[question.id] || "";
-        // Extract just the national number (without country code)
         const nationalNumber = phoneValue.includes(selectedCode)
           ? phoneValue.replace(`${selectedCode} `, "").replace(/\D/g, "")
           : phoneValue.replace(/\D/g, "");
 
-        // Get current country validation for display
         const currentCountryValidation = COUNTRY_VALIDATIONS.find(
           (c) => c.code === selectedCode
         );
@@ -611,87 +677,60 @@ const TypeformQuiz: React.FC = () => {
           <div className="w-full">
             <div className="flex items-center gap-2">
               <div className="relative" ref={dropdownRef}>
-                <button
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-                  className="flex items-center bg-purple-900/50 border border-purple-700/50 rounded px-2 py-1 text-white min-w-[80px]"
+                  className="flex items-center bg-[#1a1a1a] border-emerald-500/30 text-white hover:bg-[#2a2a2a] min-w-[80px]"
                 >
                   {selectedCode}
                   <ChevronDown className="ml-1 w-4 h-4" />
-                </button>
+                </Button>
 
                 {showCountryDropdown && (
-                  <div className="absolute top-full left-0 mt-1 max-h-60 overflow-y-auto bg-purple-900/90 border border-purple-700/50 rounded z-10 w-64">
-                    {countryCodes.map((country, index) => (
-                      <button
-                        key={`${country.code}-${country.country}-${index}`}
-                        type="button"
-                        className="block w-full text-left px-3 py-2 hover:bg-purple-800/80 text-white"
-                        onClick={() => {
-                          setSelectedCode(country.code);
-                          setShowCountryDropdown(false);
-                          setPhoneValidationError(null);
-                          // Update the stored value with new country code
-                          if (nationalNumber) {
-                            setAnswers({
-                              ...answers,
-                              [questions[currentQuestion]
-                                .id]: `${country.code} ${nationalNumber}`,
-                            });
-                          }
-                        }}
-                      >
-                        <span className="font-medium">{country.code}</span>{" "}
-                        {country.country}
-                      </button>
-                    ))}
+                  <div className="absolute top-full left-0 mt-1 bg-[#1a1a1a] border border-emerald-500/30 rounded-md z-10 w-64">
+                    <ScrollArea className="h-60">
+                      {countryCodes.map((country, index) => (
+                        <button
+                          key={`${country.code}-${country.country}-${index}`}
+                          type="button"
+                          className="block w-full text-left px-3 py-2 hover:bg-emerald-500/20 text-white text-sm"
+                          onClick={() => {
+                            setSelectedCode(country.code);
+                            setShowCountryDropdown(false);
+                            setPhoneValidationError(null);
+                            if (nationalNumber) {
+                              setAnswers({
+                                ...answers,
+                                [questions[currentQuestion]
+                                  .id]: `${country.code} ${nationalNumber}`,
+                              });
+                            }
+                          }}
+                        >
+                          <span className="font-medium">{country.code}</span>{" "}
+                          {country.country}
+                        </button>
+                      ))}
+                    </ScrollArea>
                   </div>
                 )}
               </div>
 
-              <input
+              <Input
                 ref={inputRef}
                 type="tel"
                 value={nationalNumber}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^\d]/g, "");
-
-                  if (
-                    currentCountryValidation &&
-                    value.length <= currentCountryValidation.maxLength
-                  ) {
-                    const fullNumber = value ? `${selectedCode} ${value}` : "";
-                    setAnswers({
-                      ...answers,
-                      [questions[currentQuestion].id]: fullNumber,
-                    });
-
-                    // Only validate if user has entered minimum length or more
-                    if (value.length >= currentCountryValidation.minLength) {
-                      const validation = validatePhone(value, selectedCode);
-                      if (!validation.isValid) {
-                        setPhoneValidationError(validation.error || null);
-                      } else {
-                        setPhoneValidationError(null);
-                      }
-                    } else {
-                      // Clear validation error if user is still typing
-                      setPhoneValidationError(null);
-                    }
-                  }
-
-                  setError(null);
-                }}
+                onChange={handlePhoneChange}
                 onKeyDown={handleKeyDown}
-                className="flex-1 bg-transparent border-b-2 border-white/30 focus:border-white py-2 px-1 text-lg outline-none text-white"
+                className="flex-1 bg-transparent border-0 border-b-2 border-emerald-500/30 focus:border-emerald-400 py-3 px-1 text-lg text-white rounded-none focus-visible:ring-0 placeholder:text-gray-400"
                 placeholder={currentCountryValidation?.example || "1234567890"}
                 maxLength={currentCountryValidation?.maxLength || 15}
               />
             </div>
 
-            {/* Real-time validation feedback */}
             <div className="flex items-center justify-between mt-2">
-              <div className="text-xs text-white/60">
+              <div className="text-xs text-gray-400">
                 <span className="text-orange-500 underline">
                   Asegurate de usar tu numero de whatsapp!
                 </span>
@@ -703,7 +742,7 @@ const TypeformQuiz: React.FC = () => {
                     nationalNumber.length <=
                       currentCountryValidation.maxLength &&
                     !phoneValidationError ? (
-                      <span className="text-green-400">✅ Número válido</span>
+                      <span className="text-emerald-400">✅ Número válido</span>
                     ) : nationalNumber.length > 0 ? (
                       <span>
                         {nationalNumber.length}/
@@ -733,9 +772,8 @@ const TypeformQuiz: React.FC = () => {
               )}
             </div>
 
-            {/* Country-specific format example */}
             {currentCountryValidation && (
-              <div className="text-xs text-white/40 mt-1">
+              <div className="text-xs text-gray-400 mt-1">
                 Ejemplo móvil: {selectedCode} {currentCountryValidation.example}
               </div>
             )}
@@ -743,41 +781,80 @@ const TypeformQuiz: React.FC = () => {
         );
 
       case "select":
+        const isBusinessQuestion = question.id === "business";
+
         return (
-          <div className="w-full space-y-2">
-            {question.options?.map((option) => (
-              <button
-                key={option.id}
-                onClick={() => handleOptionSelect(option.id, option.text)}
-                className={`w-full text-left p-3 rounded-md transition-colors duration-200 ${
-                  answers[question.id] === option.id
-                    ? "bg-purple-700/70 border border-purple-500"
-                    : "bg-purple-900/40 border border-purple-800/30 hover:bg-purple-800/50"
-                } text-white`}
-              >
-                <div className="flex items-center">
-                  <div
-                    className={`flex-shrink-0 w-6 h-6 rounded-full border flex items-center justify-center mr-3 ${
+          <div className="w-full">
+            {isBusinessQuestion ? (
+              <ScrollArea className="h-72 w-full border border-emerald-500/30 rounded-md">
+                <div className="p-2 space-y-2">
+                  {question.options?.map((option) => (
+                    <Button
+                      key={option.id}
+                      onClick={() => handleOptionSelect(option.id, option.text)}
+                      variant="outline"
+                      className={`w-full text-left justify-start h-auto p-3 ${
+                        answers[question.id] === option.id
+                          ? "bg-emerald-500/20 border-emerald-400 text-white"
+                          : "bg-[#1a1a1a] border-emerald-500/30 text-white hover:bg-emerald-500/10"
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <div
+                          className={`flex-shrink-0 w-4 h-4 rounded-full border flex items-center justify-center mr-3 ${
+                            answers[question.id] === option.id
+                              ? "border-emerald-400 bg-emerald-400/20"
+                              : "border-emerald-500/50"
+                          }`}
+                        >
+                          {answers[question.id] === option.id && (
+                            <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
+                          )}
+                        </div>
+                        <span className="text-sm">{option.text}</span>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+              </ScrollArea>
+            ) : (
+              <div className="w-full space-y-2">
+                {question.options?.map((option) => (
+                  <Button
+                    key={option.id}
+                    onClick={() => handleOptionSelect(option.id, option.text)}
+                    variant="outline"
+                    className={`w-full text-left justify-start h-auto p-3 ${
                       answers[question.id] === option.id
-                        ? "border-white bg-white/20"
-                        : "border-white/50"
+                        ? "bg-emerald-500/20 border-emerald-400 text-white"
+                        : "bg-[#1a1a1a] border-emerald-500/30 text-white hover:bg-emerald-500/10"
                     }`}
                   >
-                    {answers[question.id] === option.id && (
-                      <div className="w-3 h-3 rounded-full bg-white"></div>
-                    )}
-                  </div>
-                  {option.text}
-                </div>
-              </button>
-            ))}
+                    <div className="flex items-center">
+                      <div
+                        className={`flex-shrink-0 w-6 h-6 rounded-full border flex items-center justify-center mr-3 ${
+                          answers[question.id] === option.id
+                            ? "border-emerald-400 bg-emerald-400/20"
+                            : "border-emerald-500/50"
+                        }`}
+                      >
+                        {answers[question.id] === option.id && (
+                          <div className="w-3 h-3 rounded-full bg-emerald-400"></div>
+                        )}
+                      </div>
+                      {option.text}
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
         );
 
       case "textarea":
         return (
           <div className="w-full">
-            <textarea
+            <Textarea
               ref={textareaRef}
               value={answers[question.id] || ""}
               onChange={handleInputChange}
@@ -789,11 +866,10 @@ const TypeformQuiz: React.FC = () => {
                 }
               }}
               rows={5}
-              className="w-full bg-transparent border-2 border-white/30 focus:border-white rounded-md py-2 px-3 text-lg outline-none text-white resize-none"
-              placeholder="Escribe tu respuesta aquí..."
-              minLength={10}
+              className="w-full bg-transparent border-2 border-emerald-500/30 focus:border-emerald-400 text-lg text-white resize-none placeholder:text-gray-400 focus-visible:ring-0"
+              placeholder="Cuéntanos sobre tu negocio, tus objetivos y cómo planeas usar nuestro sistema..."
             />
-            <p className="text-white/60 text-xs mt-1">
+            <p className="text-gray-400 text-xs mt-1">
               Presiona Shift + Enter para hacer un salto de línea
             </p>
           </div>
@@ -807,206 +883,203 @@ const TypeformQuiz: React.FC = () => {
   // If the form is submitted, show success message with WhatsApp CTA
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-900 to-purple-950 flex justify-center items-center p-6">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-purple-900/40 backdrop-blur-md rounded-xl p-8 max-w-md w-full text-center border border-purple-700/30"
-        >
-          <div className="text-4xl mb-4">🎉</div>
-          <h2 className="text-2xl font-bold text-white mb-3">
-            ¡Gracias por aplicar!
-          </h2>
-          <p className="text-white/80 mb-6">
-            Hemos recibido tu solicitud. Nos pondremos en contacto contigo
-            pronto.
-          </p>
+      <div className="min-h-screen w-full bg-[#0f0f0f] relative text-white">
+        {/* Circuit Board - Dark Pattern */}
+        <div
+          className="absolute inset-0 z-0 pointer-events-none"
+          style={{
+            backgroundImage: `
+              repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(34, 197, 94, 0.15) 19px, rgba(34, 197, 94, 0.15) 20px, transparent 20px, transparent 39px, rgba(34, 197, 94, 0.15) 39px, rgba(34, 197, 94, 0.15) 40px),
+              repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(34, 197, 94, 0.15) 19px, rgba(34, 197, 94, 0.15) 20px, transparent 20px, transparent 39px, rgba(34, 197, 94, 0.15) 39px, rgba(34, 197, 94, 0.15) 40px),
+              radial-gradient(circle at 20px 20px, rgba(16, 185, 129, 0.18) 2px, transparent 2px),
+              radial-gradient(circle at 40px 40px, rgba(16, 185, 129, 0.18) 2px, transparent 2px)
+            `,
+            backgroundSize: "40px 40px, 40px 40px, 40px 40px, 40px 40px",
+          }}
+        />
 
-          {/* WhatsApp CTA Button */}
-          {answers.phone && (
-            <div className="mb-4">
-              <a
-                href={generateWhatsAppLink(
-                  `Hola! soy ${answers.name} Acabo de completar el formulario de Edición Persuasiva y me gustaría que revisen mi solicitud.`
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-md transition-colors mb-3 w-full justify-center"
-              >
-                <WhatsAppIcon className="w-5 h-5" />
-                Si quieres que veamos tu entrada con más rapidez da click aquí
-              </a>
-              <p className="text-white/60 text-xs">
-                Te llevará a WhatsApp con un mensaje pre-escrito
-              </p>
-            </div>
-          )}
-
-          <button
-            onClick={() => (window.location.href = "/")}
-            className="bg-white text-purple-900 font-medium py-2 px-6 rounded-md hover:bg-white/90 transition-colors w-full"
+        <div className="relative z-10 flex justify-center items-center min-h-screen p-6">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-[#1a1a1a]/80 backdrop-blur-md rounded-xl p-8 max-w-md w-full text-center border border-emerald-500/30"
           >
-            Volver al inicio
-          </button>
-        </motion.div>
+            <div className="text-4xl mb-4">🎉</div>
+            <h2 className="text-2xl font-bold text-white mb-3">
+              ¡Gracias por aplicar!
+            </h2>
+            <p className="text-gray-300 mb-6">
+              Hemos recibido tu solicitud. Nos pondremos en contacto contigo
+              pronto para darte acceso a nuestro sistema.
+            </p>
+
+            {/* WhatsApp CTA Button */}
+            {answers.phone && (
+              <div className="mb-4">
+                <Button
+                  asChild
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                >
+                  <a
+                    href={generateWhatsAppLink(
+                      `Hola! soy ${answers.name}. Acabo de completar el formulario para el sistema de $200 USD y me gustaría conocer más detalles.`
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2"
+                  >
+                    <WhatsAppIcon className="w-5 h-5" />
+                    Hablar por WhatsApp para acceso inmediato
+                  </a>
+                </Button>
+                <p className="text-gray-400 text-xs mt-2">
+                  Te llevará a WhatsApp con un mensaje pre-escrito
+                </p>
+              </div>
+            )}
+
+            <Button
+              variant="outline"
+              onClick={() => (window.location.href = "/")}
+              className="w-full border-emerald-500/30 text-black hover:bg-emerald-500/10 hover:text-white"
+            >
+              Volver al inicio
+            </Button>
+          </motion.div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-900 to-purple-950 flex justify-center items-center relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* Background gradient shapes */}
-        <div className="absolute top-1/4 -left-20 w-64 h-64 rounded-full bg-purple-700/20 blur-3xl"></div>
-        <div className="absolute bottom-1/3 -right-20 w-80 h-80 rounded-full bg-purple-600/10 blur-3xl"></div>
-
-        {/* Subtle animated particles */}
-      </div>
+    <div className="min-h-screen w-full bg-[#0f0f0f] relative text-white">
+      {/* Circuit Board - Dark Pattern */}
+      <div
+        className="absolute inset-0 z-0 pointer-events-none"
+        style={{
+          backgroundImage: `
+            repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(34, 197, 94, 0.15) 19px, rgba(34, 197, 94, 0.15) 20px, transparent 20px, transparent 39px, rgba(34, 197, 94, 0.15) 39px, rgba(34, 197, 94, 0.15) 40px),
+            repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(34, 197, 94, 0.15) 19px, rgba(34, 197, 94, 0.15) 20px, transparent 20px, transparent 39px, rgba(34, 197, 94, 0.15) 39px, rgba(34, 197, 94, 0.15) 40px),
+            radial-gradient(circle at 20px 20px, rgba(16, 185, 129, 0.18) 2px, transparent 2px),
+            radial-gradient(circle at 40px 40px, rgba(16, 185, 129, 0.18) 2px, transparent 2px)
+          `,
+          backgroundSize: "40px 40px, 40px 40px, 40px 40px, 40px 40px",
+        }}
+      />
 
       {/* Main container */}
-      <div className="w-full max-w-2xl mx-auto px-6 py-8 relative z-10">
-        {/* Progress bar */}
-        <div className="w-full bg-white/10 rounded-full h-1 mb-8">
-          <motion.div
-            className="h-1 rounded-full bg-white"
-            initial={{ width: 0 }}
-            animate={{
-              width: `${((currentQuestion + 1) / questions.length) * 100}%`,
-            }}
-            transition={{ duration: 0.3 }}
-          />
-        </div>
-
-        {/* Question container */}
-        <div className="relative h-[500px] sm:h-[400px]">
-          <AnimatePresence mode="wait">
+      <div className="relative z-10 w-full max-w-2xl mx-auto px-6 py-8 flex justify-center items-center min-h-screen">
+        <div className="w-full">
+          {/* Progress bar */}
+          <div className="w-full bg-emerald-500/20 rounded-full h-1 mb-8">
             <motion.div
-              key={currentQuestion}
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
+              className="h-1 rounded-full bg-emerald-400"
+              initial={{ width: 0 }}
+              animate={{
+                width: `${((currentQuestion + 1) / questions.length) * 100}%`,
+              }}
               transition={{ duration: 0.3 }}
-              className="absolute inset-0 flex flex-col items-start"
-            >
-              {/* Question counter */}
-              <div className="text-white/60 text-sm mb-2">
-                {currentQuestion + 1} → {questions.length}
-              </div>
+            />
+          </div>
 
-              {/* Question text */}
-              <h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-white mb-2">
-                {questions[currentQuestion].text}
-                {questions[currentQuestion].required && (
-                  <span className="text-purple-300">*</span>
-                )}
-              </h2>
-
-              {/* Question description */}
-              {questions[currentQuestion].description && (
-                <p className="text-white/70 text-sm mb-6">
-                  {questions[currentQuestion].description}
-                </p>
-              )}
-
-              {/* Question input */}
-              <div className="mt-6 w-full">{renderQuestion()}</div>
-
-              {/* Error message */}
-              {error && (
-                <div className="mt-3 text-red-300 text-sm bg-red-900/20 border border-red-500/30 rounded-md px-3 py-2">
-                  {error}
+          {/* Question container */}
+          <div className="relative h-[500px] sm:h-[400px]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentQuestion}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.3 }}
+                className="absolute inset-0 flex flex-col items-start"
+              >
+                {/* Question counter */}
+                <div className="text-emerald-400 text-sm mb-2">
+                  {currentQuestion + 1} → {questions.length}
                 </div>
-              )}
 
-              {/* Navigation buttons */}
-              <div className="mt-auto pt-8 flex justify-between w-full">
-                <button
-                  onClick={handlePrev}
-                  disabled={currentQuestion === 0}
-                  className={`flex items-center gap-1 py-2 px-4 rounded-md ${
-                    currentQuestion === 0
-                      ? "opacity-0 pointer-events-none"
-                      : "text-white/70 hover:text-white hover:bg-white/10"
-                  } transition-colors`}
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  <span>Anterior</span>
-                </button>
-
-                <button
-                  onClick={handleNext}
-                  disabled={isSubmitting}
-                  className={`flex items-center gap-1 py-2 px-4 rounded-md ${
-                    isSubmitting
-                      ? "bg-purple-700/50 text-white/70 cursor-not-allowed"
-                      : "bg-purple-700 text-white hover:bg-purple-600"
-                  } transition-colors`}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Spinner className="w-4 h-4 animate-spin" />
-                      <span>Enviando...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>
-                        {currentQuestion === questions.length - 1
-                          ? "Enviar"
-                          : "Siguiente"}
-                      </span>
-                      <ChevronRight className="w-4 h-4" />
-                    </>
+                {/* Question text */}
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-white mb-2">
+                  {questions[currentQuestion].text}
+                  {questions[currentQuestion].required && (
+                    <span className="text-emerald-400">*</span>
                   )}
-                </button>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
+                </h2>
 
-        {/* Powered by (like Typeform) */}
-        <div className="absolute bottom-2 right-2 text-white/40 text-xs">
-          Powered by Edición Persuasiva
+                {/* Question description */}
+                {questions[currentQuestion].description && (
+                  <p className="text-gray-400 text-sm mb-6">
+                    {questions[currentQuestion].description}
+                  </p>
+                )}
+
+                {/* Question input */}
+                <div className="mt-6 w-full">{renderQuestion()}</div>
+
+                {/* Error message */}
+                {error && (
+                  <div className="mt-3 text-red-300 text-sm bg-red-500/20 border border-red-500/30 rounded-md px-3 py-2">
+                    {error}
+                  </div>
+                )}
+
+                {/* Navigation buttons */}
+                <div className="mt-auto pt-8 flex justify-between w-full">
+                  <Button
+                    variant="ghost"
+                    onClick={handlePrev}
+                    disabled={currentQuestion === 0}
+                    className={`flex items-center gap-1 ${
+                      currentQuestion === 0
+                        ? "opacity-0 pointer-events-none"
+                        : "text-gray-400 hover:text-white hover:bg-emerald-500/10"
+                    }`}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span>Anterior</span>
+                  </Button>
+
+                  <Button
+                    onClick={handleNext}
+                    disabled={isSubmitting}
+                    className={`flex items-center gap-1 ${
+                      isSubmitting
+                        ? "bg-emerald-700/50 text-white/70 cursor-not-allowed"
+                        : "bg-emerald-600 text-white hover:bg-emerald-700"
+                    }`}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Spinner className="w-4 h-4 animate-spin" />
+                        <span>Enviando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>
+                          {currentQuestion === questions.length - 1
+                            ? "Enviar"
+                            : "Siguiente"}
+                        </span>
+                        <ChevronRight className="w-4 h-4" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Powered by */}
+          <div className="absolute bottom-2 right-2 text-gray-500 text-xs">
+            Powered by Tu Empresa • Full Send
+          </div>
         </div>
       </div>
-
-      {/* CSS for float animation */}
-      <style jsx>{`
-        @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0px) rotate(0deg);
-          }
-          33% {
-            transform: translateY(-10px) rotate(120deg);
-          }
-          66% {
-            transform: translateY(5px) rotate(240deg);
-          }
-        }
-      `}</style>
     </div>
   );
 };
 
 // Helper components
-const ChevronDown = ({ className = "w-6 h-6" }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M19 9l-7 7-7-7"
-    />
-  </svg>
-);
-
 const Spinner = ({ className = "w-6 h-6" }: { className?: string }) => (
   <svg
     className={className}
@@ -1041,4 +1114,4 @@ const WhatsAppIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
   </svg>
 );
 
-export default TypeformQuiz;
+export default BusinessLeadForm;
