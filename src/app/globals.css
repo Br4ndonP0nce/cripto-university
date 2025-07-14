@@ -217,7 +217,9 @@
 .discord-message:hover {
   background-color: rgba(67, 56, 89, 0.5);
 }
-
+html {
+  scroll-behavior: smooth;
+}
 /* Message reactions */
 .message-reaction {
   display: inline-flex;
