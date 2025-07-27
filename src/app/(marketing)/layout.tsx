@@ -15,9 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Demo Landing + CRM",
-  description:
-    "Demo de una landing page con un CRM integrado para capturar leads y gestionar clientes potenciales. Cloud+",
+  title: "Cripto University",
+  description: "Cripto University",
 };
 
 export default function MarketingLayout({
