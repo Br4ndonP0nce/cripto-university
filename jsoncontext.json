@@ -1,0 +1,61 @@
+{
+  "style_profile": {
+    "name": "Retro-Tech Voxel Character",
+    "visual_style": {
+      "shape": "Isometric voxel cube",
+      "dimensions": "3D isometric, pixel-perfect edges",
+      "base_form": "Block/cube with protrusions and stylized features",
+      "color_palette": {
+        "primary": "#C1121F", 
+        "secondary": "#FDF0D5",
+        "accent": "#FFFFFF",
+        "contrast_ratio": "High contrast with minimal gradient"
+      },
+      "line_art": {
+        "style": "Thick, monoline stroke",
+        "color": "#000000",
+        "effect": "Outlined vector feel with tech glyph detail"
+      },
+      "background": {
+        "type": "transparent",
+        "color": "transparent",
+        "texture": "transparent"
+      }
+    },
+    "character_design": {
+      "theme": "Futuristic, tech-inspired avatars",
+      "species": ["Robot", "AI Entity", "Glitch Sprite", "Voxel Critter", "Digital Spirit"],
+      "facial_features": {
+        "eyes": "Square or rounded rock black glasses with pixelated reflections",
+        "nose": "Simplified triangle or trapezoid",
+        "mouth": "Flat-lined or blocky squiggle",
+        "accessories": ["Chunky glasses", "headphones", "Antennas", "Plug ports"]
+      },
+      "head_decorations": {
+        "symbol_on_top": true,
+        "symbol_type": ["Broken D-pad", "QR fragment", "WiFi glitch", "Binary rune"],
+        "style": "Pixel glyph, perfectly centered"
+      },
+      "body_details": {
+        "body_parts": "Integrated into the cube surface as circuit-like extrusions",
+        "arms": "Blocky protrusions or wire-styled",
+        "legs": "Optional — implied via shadow or bottom panel details"
+      }
+    },
+    "emotion_expression": {
+      "default": "Confused, lost, or idle",
+      "alternatives": ["Alert", "Processing", "Curious", "404-error mode"],
+      "animation_style": "Static with implied movement through detail patterns"
+    },
+    "use_case": {
+      "ideal_for": ["404 pages", "tech mascots", "NFTs", "retro indie games", "AI bots"],
+      "presentation": "On bright blueprint backgrounds with glitchy font overlays",
+      "interaction": "Non-verbal, expressive through iconography and pixel posture"
+    },
+    "Dimensions":{
+        "width": "1080px",
+        "height": "1080px"
+    }
+  
+  }
+} 

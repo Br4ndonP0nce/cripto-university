@@ -1,99 +1,252 @@
+// src/components/sections/navbar.tsx
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { MenuIcon, X } from "lucide-react";
 
-interface NavItem {
-  label: string;
-  href: string;
-  isSpecial?: boolean;
-}
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
-interface NavbarProps {
-  navItems?: NavItem[];
-  logo?: {
-    text: string;
-    href: string;
-  };
-  socialLinks?: {
-    discord?: string;
-    twitter?: string;
-  };
-}
-
-const defaultNavItems: NavItem[] = [
-  { label: "Join", href: "/join", isSpecial: true },
+const navItems = [
+  { name: "About", href: "#" },
+  { name: "Join", href: "#" },
 ];
 
-const Navbar = ({
-  navItems = defaultNavItems,
-  logo = { text: "Demo", href: "/" },
-  socialLinks = { discord: "#", twitter: "#" },
-}: NavbarProps) => {
+interface NavbarProps {
+  logo?: string;
+  logoUrl?: string;
+  ctaText?: string;
+  ctaHref?: string;
+  onCtaClick?: () => void;
+  className?: string;
+}
+
+const Navbar: React.FC<NavbarProps> = ({
+  logo = "CA",
+  logoUrl = "/",
+  ctaText = "Get in touch",
+  ctaHref = "#",
+  onCtaClick,
+  className,
+}) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  const handleCtaClick = () => {
+    if (onCtaClick) {
+      onCtaClick();
+    }
+    setMobileMenuOpen(false);
+  };
+
   return (
-    <motion.nav
-      className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-4xl px-4"
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-    >
-      <div className="flex items-center justify-center">
-        {/* Main Navigation */}
-        <motion.div
-          className="flex items-center gap-8 bg-white/95 backdrop-blur-md rounded-full px-6 py-3 shadow-lg border border-white/20"
-          whileHover={{ scale: 1.02 }}
-          transition={{ duration: 0.2 }}
-        >
+    <>
+      {/* Backdrop blur overlay for mobile menu */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      <motion.header
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+        className={cn(
+          // Always use floating nav styles
+          "fixed top-0 left-0 right-0 z-50 mt-4 mx-4 md:mx-8",
+          "floating-nav px-6 py-4",
+          "bg-black/80 backdrop-blur-xl border border-white/10",
+          "rounded-2xl shadow-2xl shadow-black/20",
+          className
+        )}
+      >
+        <div className="flex items-center justify-between max-w-7xl mx-auto">
           {/* Logo */}
-          <Link href={logo.href} className="flex items-center">
+          <Link href={logoUrl} className="flex items-center gap-2">
             <motion.div
-              className="flex items-center gap-2"
               whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               transition={{ duration: 0.2 }}
+              className="relative"
             >
-              <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-xs font-bold">e</span>
-              </div>
-              <span className="text-gray-900 font-medium text-lg">
-                {logo.text}
+              <span className="font-bold text-xl tracking-tight">
+                <span className="text-brand-orange bg-gradient-to-r bg-clip-text ">
+                  CRIPTO
+                </span>
+                <span className="text-brand-yellow">UNIVERSITY</span>
               </span>
+              {/* Subtle glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-orange-600/20 blur-xl -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </motion.div>
           </Link>
 
-          {/* Navigation Items */}
-          <div className="flex items-center gap-6 ">
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-1">
             {navItems.map((item, index) => (
               <motion.div
-                key={item.label}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
+                key={item.name}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.1 + index * 0.1 }}
               >
-                {item.isSpecial ? (
-                  <Link
-                    href={item.href}
-                    className="bg-gray-900 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-gray-800 transition-colors duration-200"
-                  >
-                    {item.label}
-                  </Link>
-                ) : (
-                  <Link
-                    href={item.href}
-                    className="text-gray-700 hover:text-gray-900 font-medium text-sm transition-colors duration-200 relative group"
-                  >
-                    {item.label}
-                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gray-900 transition-all duration-200 group-hover:w-full" />
-                  </Link>
-                )}
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "relative px-4 py-2 text-sm font-medium transition-all duration-200",
+                    "text-gray-300 hover:text-white",
+                    "rounded-lg hover:bg-white/5",
+                    "group"
+                  )}
+                >
+                  {item.name}
+                  {/* Hover underline effect */}
+                  <motion.div
+                    className="absolute bottom-0 left-4 right-4 h-px bg-gradient-to-r from-orange-400 to-orange-600"
+                    initial={{ scaleX: 0, opacity: 0 }}
+                    whileHover={{ scaleX: 1, opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </Link>
               </motion.div>
             ))}
-          </div>
-        </motion.div>
 
-        {/* Social Links */}
-      </div>
-    </motion.nav>
+            {/* CTA Button */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, delay: 0.5 }}
+              className="ml-4"
+            >
+              <Button
+                onClick={onCtaClick}
+                asChild={!onCtaClick}
+                className={cn(
+                  "bg-gradient-to-r from-orange-500 to-orange-600",
+                  "hover:from-orange-600 hover:to-orange-700",
+                  "text-white font-semibold px-6 py-2",
+                  "rounded-lg shadow-lg shadow-orange-500/25",
+                  "transition-all duration-200",
+                  "hover:scale-105 hover:shadow-orange-500/40"
+                )}
+              >
+                {onCtaClick ? (
+                  <span>{ctaText}</span>
+                ) : (
+                  <Link href={ctaHref}>{ctaText}</Link>
+                )}
+              </Button>
+            </motion.div>
+          </nav>
+
+          {/* Mobile Menu Button */}
+          <motion.button
+            className="md:hidden p-2 rounded-lg hover:bg-white/5 transition-colors duration-200"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            whileTap={{ scale: 0.95 }}
+          >
+            <AnimatePresence mode="wait">
+              {mobileMenuOpen ? (
+                <motion.div
+                  key="close"
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <X className="h-6 w-6 text-white" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="menu"
+                  initial={{ rotate: 90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: -90, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <MenuIcon className="h-6 w-6 text-white" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.button>
+        </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0, y: -10 }}
+              animate={{ opacity: 1, height: "auto", y: 0 }}
+              exit={{ opacity: 0, height: 0, y: -10 }}
+              transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
+              className="md:hidden overflow-hidden"
+            >
+              <div className="pt-6 pb-4 border-t border-white/10 mt-4">
+                <div className="flex flex-col space-y-1">
+                  {navItems.map((item, index) => (
+                    <motion.div
+                      key={item.name}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                    >
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          "block px-4 py-3 text-base font-medium",
+                          "text-gray-300 hover:text-white hover:bg-white/5",
+                          "rounded-lg transition-all duration-200"
+                        )}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {item.name}
+                      </Link>
+                    </motion.div>
+                  ))}
+
+                  {/* Mobile CTA */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.4 }}
+                    className="pt-4"
+                  >
+                    <Button
+                      onClick={handleCtaClick}
+                      asChild={!onCtaClick}
+                      className={cn(
+                        "w-full bg-gradient-to-r from-orange-500 to-orange-600",
+                        "hover:from-orange-600 hover:to-orange-700",
+                        "text-white font-semibold py-3",
+                        "rounded-lg shadow-lg shadow-orange-500/25",
+                        "transition-all duration-200"
+                      )}
+                    >
+                      {onCtaClick ? (
+                        <span>{ctaText}</span>
+                      ) : (
+                        <Link href={ctaHref}>{ctaText}</Link>
+                      )}
+                    </Button>
+                  </motion.div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.header>
+    </>
   );
 };
 

@@ -41,6 +41,9 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --color-brand-orange: var(--brand-orange);
+    --color-brand-blue: var(--brand-blue);
+    --color-brand-yellow: var(--brand-yellow);
 }
 
 :root {
@@ -76,6 +79,9 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+    --brand-orange: #c1121f;
+      --brand-blue: #c1121f;
+      --brand-yellow: #fdf0d5;
 }
 
 .dark {
@@ -495,4 +501,15 @@ html {
       0 0 20px rgba(192, 132, 252, 0.4),
       0 0 30px rgba(192, 132, 252, 0.2);
     animation: pulse-glow 4s ease-in-out infinite;
+}
+.brand-orange {
+  color: var(--brand-orange);
+}
+
+.brand-blue {
+  color: var(--brand-blue);
+}
+
+.brand-yellow {
+  color: var(--brand-yellow);
 }
