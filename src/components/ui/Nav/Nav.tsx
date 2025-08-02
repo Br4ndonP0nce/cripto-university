@@ -27,8 +27,8 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({
   logo = "CA",
   logoUrl = "/",
-  ctaText = "Get in touch",
-  ctaHref = "#",
+  ctaText = "Unete Ahora",
+  ctaHref = "/join",
   onCtaClick,
   className,
 }) => {

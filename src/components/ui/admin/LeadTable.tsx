@@ -1,9 +1,12 @@
+// src/components/ui/admin/LeadTable.tsx - Updated for CriptoUniversity
 import React, { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Lead, updateLead } from "@/lib/firebase/db";
-import { getSaleByLeadId } from "@/lib/firebase/sales";
-import { Sale } from "@/types/sales";
-import SaleModal from "./SalesModal";
+import {
+  Lead,
+  updateLead,
+  updateBlofinInvestment,
+  updateCommunityAccess,
+} from "@/lib/firebase/db";
 import {
   Table,
   TableBody,
@@ -26,7 +29,6 @@ import {
   Eye,
   MoreVertical,
   DollarSign,
-  CreditCard,
   CheckCircle,
   Clock,
   XCircle,
@@ -34,24 +36,19 @@ import {
   Edit2,
   FileText,
   Lock,
-  Building,
-  Briefcase,
+  Flag,
+  MessageCircle,
+  CreditCard,
+  ExternalLink,
 } from "lucide-react";
 
-interface EnhancedLeadTableProps {
+interface LeadTableProps {
   leads: Lead[];
   onStatusChange: (leadId: string, newStatus: Lead["status"]) => void;
 }
 
-export default function EnhancedLeadTable({
-  leads,
-  onStatusChange,
-}: EnhancedLeadTableProps) {
+export default function LeadTable({ leads, onStatusChange }: LeadTableProps) {
   const { hasPermission, userProfile } = useAuth();
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [showSaleModal, setShowSaleModal] = useState(false);
-  const [salesData, setSalesData] = useState<Record<string, Sale>>({});
-  const [loadingSales, setLoadingSales] = useState<Record<string, boolean>>({});
   const [updatingStatus, setUpdatingStatus] = useState<Record<string, boolean>>(
     {}
   );
@@ -73,46 +70,19 @@ export default function EnhancedLeadTable({
       onStatusChange(leadId, newStatus);
     } catch (error) {
       console.error("Error updating lead status:", error);
-      // Could add toast notification here
     } finally {
       setUpdatingStatus((prev) => ({ ...prev, [leadId]: false }));
     }
   };
 
-  // Load sale data for leads with sales
-  const loadSaleData = async (leadId: string) => {
-    if (salesData[leadId] || loadingSales[leadId]) return;
-
-    setLoadingSales((prev) => ({ ...prev, [leadId]: true }));
-    try {
-      const sale = await getSaleByLeadId(leadId);
-      if (sale) {
-        setSalesData((prev) => ({ ...prev, [leadId]: sale }));
-      }
-    } catch (error) {
-      console.error("Error loading sale data:", error);
-    } finally {
-      setLoadingSales((prev) => ({ ...prev, [leadId]: false }));
-    }
-  };
-
-  React.useEffect(() => {
-    // Load sales data for leads with sale status
-    leads.forEach((lead) => {
-      if (lead.status === "sale" && lead.saleId) {
-        loadSaleData(lead.id!);
-      }
-    });
-  }, [leads]);
-
   const getStatusColor = (status: Lead["status"]) => {
     switch (status) {
-      case "lead":
-        return "bg-blue-100 text-blue-800";
-      case "onboarding":
+      case "student_pending":
         return "bg-amber-100 text-amber-800";
-      case "sale":
+      case "student_active":
         return "bg-green-100 text-green-800";
+      case "student_inactive":
+        return "bg-gray-100 text-gray-800";
       case "rejected":
         return "bg-red-100 text-red-800";
       default:
@@ -122,12 +92,12 @@ export default function EnhancedLeadTable({
 
   const getStatusIcon = (status: Lead["status"]) => {
     switch (status) {
-      case "lead":
-        return <User className="h-3 w-3" />;
-      case "onboarding":
+      case "student_pending":
         return <Clock className="h-3 w-3" />;
-      case "sale":
+      case "student_active":
         return <CheckCircle className="h-3 w-3" />;
+      case "student_inactive":
+        return <User className="h-3 w-3" />;
       case "rejected":
         return <XCircle className="h-3 w-3" />;
       default:
@@ -137,12 +107,12 @@ export default function EnhancedLeadTable({
 
   const getStatusLabel = (status: Lead["status"]) => {
     switch (status) {
-      case "lead":
-        return "Nuevo Lead";
-      case "onboarding":
-        return "En Onboarding";
-      case "sale":
-        return "Venta";
+      case "student_pending":
+        return "Pendiente";
+      case "student_active":
+        return "Activo";
+      case "student_inactive":
+        return "Inactivo";
       case "rejected":
         return "Rechazado";
       default:
@@ -150,71 +120,71 @@ export default function EnhancedLeadTable({
     }
   };
 
-  // NEW: Get business type from role field (which now contains business type)
-  const getBusinessTypeLabel = (role: string) => {
-    const businessTypes: Record<string, string> = {
-      agency: "Agencia Marketing",
-      ecommerce: "E-commerce",
-      saas: "SaaS/Tech",
-      consulting: "Consultoría",
-      real_estate: "Bienes Raíces",
-      education: "Educación",
-      health: "Salud/Wellness",
-      restaurant: "Restaurante",
-      retail: "Retail",
-      freelancer: "Freelancer",
-      startup: "Startup",
-      other: "Otro",
-    };
-    return businessTypes[role] || role;
-  };
-
-  // NEW: Get business type icon
-  const getBusinessTypeIcon = (role: string) => {
-    switch (role) {
-      case "agency":
-      case "consulting":
-        return <Briefcase className="h-3 w-3" />;
-      case "ecommerce":
-      case "retail":
-        return <Building className="h-3 w-3" />;
-      case "saas":
-        return <CreditCard className="h-3 w-3" />;
-      default:
-        return <Building className="h-3 w-3" />;
-    }
-  };
-
-  // NEW: Updated investment analysis for $200 system
-  const getInvestmentLevel = (investment: string) => {
-    if (
-      investment.toLowerCase().includes("claro") ||
-      investment.toLowerCase().includes("cuento con la inversión")
-    ) {
+  const getBlofinStatus = (lead: Lead) => {
+    if (lead.blofinInvestmentCompleted) {
       return {
-        level: "high",
-        label: "🔥 Alto",
-        color: "bg-red-100 text-red-700",
-        description: "Cuenta con $200",
+        status: "completed",
+        label: "✅ Completada",
+        color: "bg-green-100 text-green-800",
+        amount: `${lead.blofinInvestmentAmount || 0} ${
+          lead.blofinInvestmentCurrency || "USD"
+        }`,
       };
-    } else if (
-      investment.toLowerCase().includes("puedo conseguirla") ||
-      investment.toLowerCase().includes("puedo conseguir")
-    ) {
+    } else if (lead.blofinAccountCreated) {
       return {
-        level: "medium",
-        label: "🟡 Medio",
-        color: "bg-yellow-100 text-yellow-700",
-        description: "Puede conseguir $200",
+        status: "account_created",
+        label: "🔗 Cuenta Creada",
+        color: "bg-blue-100 text-blue-800",
+        amount: "Pendiente inversión",
       };
     } else {
       return {
-        level: "low",
-        label: "❄️ Bajo",
-        color: "bg-blue-100 text-blue-700",
-        description: "No cuenta con $200",
+        status: "pending",
+        label: "⏳ Pendiente",
+        color: "bg-gray-100 text-gray-800",
+        amount: "Sin cuenta",
       };
     }
+  };
+
+  const getAccessStatus = (lead: Lead) => {
+    if (!lead.accessGranted) {
+      return {
+        status: "no_access",
+        label: "Sin Acceso",
+        color: "bg-gray-100 text-gray-800",
+      };
+    }
+
+    if (lead.accessEndDate) {
+      const endDate = lead.accessEndDate.toDate
+        ? lead.accessEndDate.toDate()
+        : new Date(lead.accessEndDate.toDate());
+      const now = new Date();
+      const daysLeft = Math.ceil(
+        (endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+      );
+
+      if (daysLeft > 0) {
+        return {
+          status: "active",
+          label: `Activo (${daysLeft}d)`,
+          color: "bg-green-100 text-green-800",
+        };
+      } else {
+        return {
+          status: "expired",
+          label: "Expirado",
+          color: "bg-red-100 text-red-800",
+        };
+      }
+    }
+
+    return {
+      status: "active",
+      label: "Acceso Otorgado",
+      color: "bg-green-100 text-green-800",
+    };
   };
 
   const formatDate = (timestamp: any) => {
@@ -228,29 +198,62 @@ export default function EnhancedLeadTable({
     }).format(date);
   };
 
-  const handleCreateSale = (lead: Lead) => {
-    // If lead already has a sale, don't create another one
-    if (lead.status === "sale" && lead.saleId) {
-      return;
-    }
-
-    setSelectedLead(lead);
-    setShowSaleModal(true);
+  const getCountryFlag = (country: string) => {
+    const countryFlags: Record<string, string> = {
+      mx: "🇲🇽",
+      ar: "🇦🇷",
+      pe: "🇵🇪",
+      co: "🇨🇴",
+      cl: "🇨🇱",
+      br: "🇧🇷",
+      ec: "🇪🇨",
+      ve: "🇻🇪",
+      uy: "🇺🇾",
+      py: "🇵🇾",
+      bo: "🇧🇴",
+      cr: "🇨🇷",
+      pa: "🇵🇦",
+      gt: "🇬🇹",
+      sv: "🇸🇻",
+      hn: "🇭🇳",
+      ni: "🇳🇮",
+      do: "🇩🇴",
+      cu: "🇨🇺",
+      us: "🇺🇸",
+      ca: "🇨🇦",
+      es: "🇪🇸",
+      other: "🌍",
+    };
+    return countryFlags[country] || "🌍";
   };
 
-  const handleSaleCreated = () => {
-    // Refresh the leads data through parent component
-    // The parent should refetch the leads to get updated data
-    window.location.reload(); // Simple refresh - in production, the parent should handle this
-  };
-
-  const getSaleInfo = (lead: Lead) => {
-    if (lead.status !== "sale" || !lead.saleId) return null;
-    return salesData[lead.id!];
-  };
-
-  const getPaymentProgress = (sale: Sale) => {
-    return (sale.paidAmount / sale.totalAmount) * 100;
+  const getCountryName = (country: string) => {
+    const countryNames: Record<string, string> = {
+      mx: "México",
+      ar: "Argentina",
+      pe: "Perú",
+      co: "Colombia",
+      cl: "Chile",
+      br: "Brasil",
+      ec: "Ecuador",
+      ve: "Venezuela",
+      uy: "Uruguay",
+      py: "Paraguay",
+      bo: "Bolivia",
+      cr: "Costa Rica",
+      pa: "Panamá",
+      gt: "Guatemala",
+      sv: "El Salvador",
+      hn: "Honduras",
+      ni: "Nicaragua",
+      do: "República Dominicana",
+      cu: "Cuba",
+      us: "Estados Unidos",
+      ca: "Canadá",
+      es: "España",
+      other: "Otro país",
+    };
+    return countryNames[country] || country;
   };
 
   /**
@@ -260,14 +263,14 @@ export default function EnhancedLeadTable({
     currentStatus: Lead["status"]
   ): Lead["status"][] => {
     switch (currentStatus) {
-      case "lead":
-        return ["onboarding", "rejected"];
-      case "onboarding":
-        return ["lead", "rejected"]; // sale transition happens via "Create Sale" button
-      case "sale":
-        return []; // NO status changes allowed once it's a sale
+      case "student_pending":
+        return ["student_active", "student_inactive", "rejected"];
+      case "student_active":
+        return ["student_inactive"];
+      case "student_inactive":
+        return ["student_active", "rejected"];
       case "rejected":
-        return ["lead", "onboarding"];
+        return ["student_pending"];
       default:
         return [];
     }
@@ -277,14 +280,17 @@ export default function EnhancedLeadTable({
    * Check if any status changes are allowed for this lead
    */
   const canChangeStatus = (lead: Lead): boolean => {
-    // No status changes allowed for sales
-    if (lead.status === "sale") return false;
-
     // Check if user has permission
     if (!hasPermission("leads:write")) return false;
 
     // Check if there are any allowed transitions
     return getAllowedStatusTransitions(lead.status).length > 0;
+  };
+
+  const generateWhatsAppLink = (phone: string, name: string) => {
+    const cleanPhone = phone.replace(/[^\d+]/g, "");
+    const message = `¡Hola ${name}! Te contacto desde CriptoUniversity. ¿Cómo podemos ayudarte con tu proceso de registro y acceso a los cursos?`;
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
   };
 
   return (
@@ -293,23 +299,22 @@ export default function EnhancedLeadTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Contacto</TableHead>
+              <TableHead>Estudiante</TableHead>
               <TableHead>Estado</TableHead>
-              <TableHead>Inversión ($200)</TableHead>
-              <TableHead>Tipo de Negocio</TableHead>
-              <TableHead>Descripción</TableHead>
-              <TableHead>Creado</TableHead>
+              <TableHead>País</TableHead>
+              <TableHead>Estado Blofin</TableHead>
+              <TableHead>Acceso Curso</TableHead>
+              <TableHead>Registrado</TableHead>
               <TableHead>Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {leads.map((lead) => {
-              const sale = getSaleInfo(lead);
-              const isLoadingSale = loadingSales[lead.id!];
               const allowedTransitions = getAllowedStatusTransitions(
                 lead.status
               );
-              const investmentData = getInvestmentLevel(lead.investment);
+              const blofinStatus = getBlofinStatus(lead);
+              const accessStatus = getAccessStatus(lead);
 
               return (
                 <TableRow
@@ -321,7 +326,7 @@ export default function EnhancedLeadTable({
                   <TableCell>
                     <div className="flex items-center space-x-3">
                       <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-purple-100 text-purple-700 text-xs">
+                        <AvatarFallback className="bg-brand-amber/20 text-brand-amber text-xs">
                           {lead.name.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -347,107 +352,65 @@ export default function EnhancedLeadTable({
                         {getStatusIcon(lead.status)}
                         {getStatusLabel(lead.status)}
                       </Badge>
-                      {/* Show lock icon for sales to indicate no changes allowed */}
-                      {lead.status === "sale" && (
-                        <Lock className="h-3 w-3 text-gray-400" />
-                      )}
-                    </div>
-                  </TableCell>
-
-                  <TableCell>
-                    <div className="space-y-2">
-                      {/* Investment Info for $200 system */}
-                      <div className="space-y-1">
-                        <div
-                          className={`text-xs px-2 py-1 rounded-full font-medium w-fit ${investmentData.color}`}
-                        >
-                          {investmentData.label}
-                        </div>
-                        <div className="text-xs text-gray-600">
-                          {investmentData.description}
-                        </div>
-                      </div>
-
-                      {/* Sales Info - Only for sales */}
-                      {lead.status === "sale" && (
-                        <div className="border-t pt-2 space-y-1">
-                          {isLoadingSale ? (
-                            <div className="text-xs text-gray-500">
-                              Cargando venta...
-                            </div>
-                          ) : sale ? (
-                            <>
-                              <div className="text-sm font-medium">
-                                ${sale.totalAmount.toLocaleString()}
-                              </div>
-                              <div className="text-xs text-gray-600">
-                                Plan:{" "}
-                                {sale.paymentPlan
-                                  .replace("_", " ")
-                                  .toUpperCase()}
-                              </div>
-                              <div className="text-xs">
-                                <div className="flex justify-between items-center">
-                                  <span>
-                                    Pagado: ${sale.paidAmount.toLocaleString()}
-                                  </span>
-                                  <span className="text-green-600">
-                                    {getPaymentProgress(sale).toFixed(0)}%
-                                  </span>
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-1 mt-1">
-                                  <div
-                                    className="bg-green-500 h-1 rounded-full"
-                                    style={{
-                                      width: `${Math.min(
-                                        getPaymentProgress(sale),
-                                        100
-                                      )}%`,
-                                    }}
-                                  />
-                                </div>
-                              </div>
-                              {sale.accessGranted && (
-                                <Badge className="bg-green-100 text-green-800 text-xs">
-                                  Acceso Otorgado
-                                </Badge>
-                              )}
-                            </>
-                          ) : (
-                            <div className="text-xs text-red-500">
-                              Error cargando venta
-                            </div>
-                          )}
-                        </div>
-                      )}
                     </div>
                   </TableCell>
 
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      {getBusinessTypeIcon(lead.role)}
-                      <div className="text-sm">
-                        <div className="font-medium">
-                          {getBusinessTypeLabel(lead.role)}
+                      <span className="text-lg">
+                        {getCountryFlag(lead.country)}
+                      </span>
+                      <div>
+                        <div className="text-sm font-medium">
+                          {getCountryName(lead.country)}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {/* Show a truncated version of the original business text */}
-                          {lead.role && lead.role.length > 20
-                            ? `${lead.role.substring(0, 20)}...`
-                            : lead.role}
+                          {lead.country?.toUpperCase() || "N/A"}
                         </div>
                       </div>
                     </div>
                   </TableCell>
 
                   <TableCell>
-                    <div className="text-sm max-w-xs">
-                      {/* Show business description from the "why" field or "clients" field */}
-                      <div className="text-gray-700 line-clamp-2">
-                        {lead.why && lead.why.length > 100
-                          ? `${lead.why.substring(0, 100)}...`
-                          : lead.why || "Sin descripción"}
+                    <div className="space-y-1">
+                      <Badge className={`${blofinStatus.color} text-xs`}>
+                        {blofinStatus.label}
+                      </Badge>
+                      <div className="text-xs text-gray-600">
+                        {blofinStatus.amount}
                       </div>
+                      {lead.blofinProofUploaded && (
+                        <div className="text-xs text-green-600">
+                          📄 Comprobante subido
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
+
+                  <TableCell>
+                    <div className="space-y-1">
+                      <Badge className={`${accessStatus.color} text-xs`}>
+                        {accessStatus.label}
+                      </Badge>
+                      {lead.communityAccess && (
+                        <div className="flex gap-1 mt-1 flex-wrap">
+                          {lead.communityAccess.discord && (
+                            <span className="text-xs bg-blue-100 text-blue-800 px-1 rounded">
+                              Discord
+                            </span>
+                          )}
+                          {lead.communityAccess.telegram && (
+                            <span className="text-xs bg-green-100 text-green-800 px-1 rounded">
+                              Telegram
+                            </span>
+                          )}
+                          {lead.communityAccess.whatsapp && (
+                            <span className="text-xs bg-emerald-100 text-emerald-800 px-1 rounded">
+                              WhatsApp
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </TableCell>
 
@@ -466,6 +429,17 @@ export default function EnhancedLeadTable({
                         </a>
                       </Button>
 
+                      {/* WhatsApp Button */}
+                      <Button size="sm" variant="ghost" asChild>
+                        <a
+                          href={generateWhatsAppLink(lead.phone, lead.name)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <MessageCircle className="h-4 w-4 text-green-600" />
+                        </a>
+                      </Button>
+
                       {/* Actions Dropdown */}
                       {hasPermission("leads:write") && (
                         <DropdownMenu>
@@ -475,21 +449,7 @@ export default function EnhancedLeadTable({
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            {/* Create Sale Option - Only for onboarding */}
-                            {lead.status === "onboarding" && (
-                              <>
-                                <DropdownMenuItem
-                                  onClick={() => handleCreateSale(lead)}
-                                  className="flex items-center"
-                                >
-                                  <DollarSign className="mr-2 h-4 w-4 text-green-600" />
-                                  Crear Venta
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                              </>
-                            )}
-
-                            {/* Status Change Options - Only if transitions are allowed */}
+                            {/* Status Change Options */}
                             {canChangeStatus(lead) &&
                               allowedTransitions.length > 0 && (
                                 <>
@@ -498,17 +458,23 @@ export default function EnhancedLeadTable({
                                       status: Lead["status"]
                                     ) => {
                                       switch (status) {
-                                        case "lead":
-                                          return {
-                                            icon: User,
-                                            label: "Marcar como Lead",
-                                            color: "text-blue-600",
-                                          };
-                                        case "onboarding":
+                                        case "student_pending":
                                           return {
                                             icon: Clock,
-                                            label: "Iniciar Onboarding",
+                                            label: "Marcar como Pendiente",
                                             color: "text-amber-600",
+                                          };
+                                        case "student_active":
+                                          return {
+                                            icon: CheckCircle,
+                                            label: "Activar Estudiante",
+                                            color: "text-green-600",
+                                          };
+                                        case "student_inactive":
+                                          return {
+                                            icon: User,
+                                            label: "Marcar como Inactivo",
+                                            color: "text-gray-600",
                                           };
                                         case "rejected":
                                           return {
@@ -552,19 +518,37 @@ export default function EnhancedLeadTable({
                                 </>
                               )}
 
-                            {/* Sale is locked - show info */}
-                            {lead.status === "sale" && (
-                              <>
-                                <DropdownMenuItem
-                                  disabled
-                                  className="flex items-center text-gray-500"
-                                >
-                                  <Lock className="mr-2 h-4 w-4" />
-                                  Estado bloqueado (venta)
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                              </>
-                            )}
+                            {/* Blofin Actions */}
+                            <DropdownMenuItem
+                              onClick={() => {
+                                // TODO: Open Blofin investment modal
+                                console.log(
+                                  "Update Blofin investment for:",
+                                  lead.id
+                                );
+                              }}
+                              className="flex items-center text-blue-600"
+                            >
+                              <DollarSign className="mr-2 h-4 w-4" />
+                              Actualizar Inversión Blofin
+                            </DropdownMenuItem>
+
+                            {/* Community Access */}
+                            <DropdownMenuItem
+                              onClick={() => {
+                                // TODO: Open community access modal
+                                console.log(
+                                  "Manage community access for:",
+                                  lead.id
+                                );
+                              }}
+                              className="flex items-center text-purple-600"
+                            >
+                              <MessageCircle className="mr-2 h-4 w-4" />
+                              Gestionar Acceso Comunidad
+                            </DropdownMenuItem>
+
+                            <DropdownMenuSeparator />
 
                             {/* Edit Notes */}
                             <DropdownMenuItem asChild>
@@ -588,21 +572,18 @@ export default function EnhancedLeadTable({
                               </a>
                             </DropdownMenuItem>
 
-                            {/* View Sale Details - only show if there's sale data */}
-                            {lead.status === "sale" && sale && (
-                              <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem asChild>
-                                  <a
-                                    href={`/admin/activos`}
-                                    className="flex items-center"
-                                  >
-                                    <CreditCard className="mr-2 h-4 w-4 text-purple-600" />
-                                    Ver en Activos
-                                  </a>
-                                </DropdownMenuItem>
-                              </>
-                            )}
+                            {/* Blofin Link */}
+                            <DropdownMenuItem asChild>
+                              <a
+                                href="https://partner.blofin.com/d/criptouniversity"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center"
+                              >
+                                <ExternalLink className="mr-2 h-4 w-4 text-blue-600" />
+                                Link Blofin
+                              </a>
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       )}
@@ -615,33 +596,15 @@ export default function EnhancedLeadTable({
         </Table>
       </div>
 
-      {/* Sale Creation Modal */}
-      {selectedLead && (
-        <SaleModal
-          isOpen={showSaleModal}
-          onClose={() => {
-            setShowSaleModal(false);
-            setSelectedLead(null);
-          }}
-          lead={{
-            id: selectedLead.id!,
-            name: selectedLead.name,
-            email: selectedLead.email,
-            investment: selectedLead.investment,
-          }}
-          onSuccess={handleSaleCreated}
-        />
-      )}
-
       {/* Empty State */}
       {leads.length === 0 && (
         <div className="text-center py-12">
           <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No hay leads
+            No hay estudiantes
           </h3>
           <p className="text-gray-500">
-            Los leads aparecerán aquí una vez que se registren.
+            Los estudiantes aparecerán aquí una vez que se registren.
           </p>
         </div>
       )}

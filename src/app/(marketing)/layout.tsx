@@ -1,7 +1,7 @@
 // src/app/(marketing)/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-
+import Footer from "@/components/ui/Footer/Footer";
 import { VideoPreloadProvider } from "@/contexts/VideoPreloadContent";
 import Navbar from "@/components/ui/Nav/Nav";
 const geistSans = Geist({
@@ -28,6 +28,7 @@ export default function MarketingLayout({
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
       <Navbar />
       {children}
+      <Footer />
     </div>
   );
 }

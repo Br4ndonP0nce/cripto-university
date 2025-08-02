@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getLead, updateLead, Lead } from "@/lib/firebase/db";
-import SalesInfoComponent from "@/components/ui/admin/SalesInfoComponent";
+import StudentInfoComponent from "@/components/ui/admin/SalesInfoComponent";
 import LeadHistoryComponent from "@/components/ui/admin/LeadHistoryComponent";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +30,11 @@ import {
   MessageSquare,
   Briefcase,
   CreditCard,
+  MapPin,
+  Users,
+  CheckCircle,
+  XCircle,
+  Clock,
 } from "lucide-react";
 
 export default function LeadDetailsPage() {
@@ -85,12 +90,12 @@ export default function LeadDetailsPage() {
 
   const getStatusColor = (status: Lead["status"]) => {
     switch (status) {
-      case "lead":
+      case "student_pending":
         return "bg-blue-100 text-blue-800 border-blue-200";
-      case "onboarding":
-        return "bg-amber-100 text-amber-800 border-amber-200";
-      case "sale":
+      case "student_active":
         return "bg-green-100 text-green-800 border-green-200";
+      case "student_inactive":
+        return "bg-amber-100 text-amber-800 border-amber-200";
       case "rejected":
         return "bg-red-100 text-red-800 border-red-200";
       default:
@@ -98,114 +103,47 @@ export default function LeadDetailsPage() {
     }
   };
 
-  // NEW: Get business type from role field
-  const getBusinessTypeDetails = (role: string) => {
-    const businessTypes: Record<
-      string,
-      { label: string; icon: React.ReactNode; color: string }
-    > = {
-      agency: {
-        label: "Agencia de Marketing Digital",
-        icon: <Briefcase className="h-4 w-4" />,
-        color: "bg-purple-100 text-purple-800",
-      },
-      ecommerce: {
-        label: "E-commerce / Tienda Online",
-        icon: <Building className="h-4 w-4" />,
-        color: "bg-blue-100 text-blue-800",
-      },
-      saas: {
-        label: "Software / SaaS / Tecnología",
-        icon: <CreditCard className="h-4 w-4" />,
-        color: "bg-green-100 text-green-800",
-      },
-      consulting: {
-        label: "Consultoría / Servicios Profesionales",
-        icon: <Briefcase className="h-4 w-4" />,
-        color: "bg-amber-100 text-amber-800",
-      },
-      real_estate: {
-        label: "Bienes Raíces / Inmobiliaria",
-        icon: <Building className="h-4 w-4" />,
-        color: "bg-teal-100 text-teal-800",
-      },
-      education: {
-        label: "Educación / Cursos Online",
-        icon: <Building className="h-4 w-4" />,
-        color: "bg-indigo-100 text-indigo-800",
-      },
-      health: {
-        label: "Salud / Medicina / Wellness",
-        icon: <Building className="h-4 w-4" />,
-        color: "bg-red-100 text-red-800",
-      },
-      restaurant: {
-        label: "Restaurante / Comida",
-        icon: <Building className="h-4 w-4" />,
-        color: "bg-orange-100 text-orange-800",
-      },
-      retail: {
-        label: "Retail / Tienda Física",
-        icon: <Building className="h-4 w-4" />,
-        color: "bg-pink-100 text-pink-800",
-      },
-      freelancer: {
-        label: "Freelancer / Profesional Independiente",
-        icon: <Briefcase className="h-4 w-4" />,
-        color: "bg-cyan-100 text-cyan-800",
-      },
-      startup: {
-        label: "Startup / Emprendimiento Nuevo",
-        icon: <Building className="h-4 w-4" />,
-        color: "bg-violet-100 text-violet-800",
-      },
-      other: {
-        label: "Otro Tipo de Negocio",
-        icon: <Building className="h-4 w-4" />,
-        color: "bg-gray-100 text-gray-800",
-      },
-    };
-
-    return (
-      businessTypes[role] || {
-        label: role || "No especificado",
-        icon: <Building className="h-4 w-4" />,
-        color: "bg-gray-100 text-gray-800",
-      }
-    );
+  const getStatusLabel = (status: Lead["status"]) => {
+    switch (status) {
+      case "student_pending":
+        return "Estudiante Pendiente";
+      case "student_active":
+        return "Estudiante Activo";
+      case "student_inactive":
+        return "Estudiante Inactivo";
+      case "rejected":
+        return "Rechazado";
+      default:
+        return status;
+    }
   };
 
-  // NEW: Get investment level analysis for $200 system
-  const getInvestmentAnalysis = (investment: string) => {
-    if (
-      investment.toLowerCase().includes("claro") ||
-      investment.toLowerCase().includes("cuento con la inversión")
-    ) {
+  // Get investment level analysis for Blofin
+  const getBlofinAnalysis = (lead: Lead) => {
+    if (lead.blofinInvestmentCompleted) {
       return {
-        level: "Alto Potencial",
-        description: "Cuenta con la inversión de $200 USD",
-        color: "bg-red-100 text-red-800",
-        icon: <DollarSign className="h-4 w-4 text-red-600" />,
-        priority: "🔥 ALTA PRIORIDAD",
+        level: "Inversión Completada",
+        description: `${lead.blofinInvestmentAmount} ${lead.blofinInvestmentCurrency} - Inversión verificada`,
+        color: "bg-green-100 text-green-800",
+        icon: <CheckCircle className="h-4 w-4 text-green-600" />,
+        priority: "✅ ACTIVO",
       };
-    } else if (
-      investment.toLowerCase().includes("puedo conseguirla") ||
-      investment.toLowerCase().includes("puedo conseguir")
-    ) {
+    } else if (lead.blofinAccountCreated) {
       return {
-        level: "Potencial Medio",
-        description: "Puede conseguir la inversión de $200 USD",
+        level: "Cuenta Creada",
+        description:
+          "Tiene cuenta en Blofin pero no ha completado inversión mínima",
         color: "bg-yellow-100 text-yellow-800",
-        icon: <DollarSign className="h-4 w-4 text-yellow-600" />,
-        priority: "🟡 PRIORIDAD MEDIA",
+        icon: <Clock className="h-4 w-4 text-yellow-600" />,
+        priority: "⏳ PENDIENTE",
       };
     } else {
       return {
-        level: "Bajo Potencial",
-        description: "No cuenta con la inversión de $200 USD",
+        level: "Sin Cuenta",
+        description: "No ha creado cuenta en Blofin",
         color: "bg-blue-100 text-blue-800",
-        icon: <DollarSign className="h-4 w-4 text-blue-600" />,
-        priority: "❄️ PRIORIDAD BAJA",
+        icon: <XCircle className="h-4 w-4 text-blue-600" />,
+        priority: "📝 REGISTRO PENDIENTE",
       };
     }
   };
@@ -247,8 +185,7 @@ export default function LeadDetailsPage() {
     );
   }
 
-  const businessDetails = getBusinessTypeDetails(lead.role);
-  const investmentAnalysis = getInvestmentAnalysis(lead.investment);
+  const blofinAnalysis = getBlofinAnalysis(lead);
 
   return (
     <div className="p-6">
@@ -284,17 +221,11 @@ export default function LeadDetailsPage() {
               <CardDescription>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge className={`${getStatusColor(lead.status)}`}>
-                    {lead.status === "lead"
-                      ? "Nuevo Lead"
-                      : lead.status === "onboarding"
-                      ? "En Onboarding"
-                      : lead.status === "sale"
-                      ? "Venta Realizada"
-                      : "Rechazado"}
+                    {getStatusLabel(lead.status)}
                   </Badge>
-                  {/* NEW: Investment Priority Badge */}
-                  <Badge className={investmentAnalysis.color}>
-                    {investmentAnalysis.priority}
+                  {/* Blofin Status Badge */}
+                  <Badge className={blofinAnalysis.color}>
+                    {blofinAnalysis.priority}
                   </Badge>
                 </div>
               </CardDescription>
@@ -354,7 +285,11 @@ export default function LeadDetailsPage() {
                     </a>
                   )}
                 </div>
-                {/* NEW: WhatsApp quick action */}
+                <div className="flex items-center">
+                  <MapPin className="h-4 w-4 text-gray-500 mr-2" />
+                  <span>{lead.country}</span>
+                </div>
+                {/* WhatsApp quick action */}
                 <div className="flex items-center">
                   <MessageSquare className="h-4 w-4 text-green-500 mr-2" />
                   <a
@@ -363,7 +298,7 @@ export default function LeadDetailsPage() {
                       ""
                     )}?text=Hola ${
                       lead.name
-                    }, te contacto desde el equipo de Full Send respecto a tu consulta sobre nuestro sistema.`}
+                    }, te contacto desde el equipo de CriptoUniversity respecto a tu registro.`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-green-600 hover:underline text-sm"
@@ -377,12 +312,26 @@ export default function LeadDetailsPage() {
                 <div className="text-sm text-gray-500">Fechas</div>
                 <div className="flex items-center">
                   <Calendar className="h-4 w-4 text-gray-500 mr-2" />
-                  <span>Creado: {formatDate(lead.createdAt)}</span>
+                  <span>Registro: {formatDate(lead.createdAt)}</span>
                 </div>
                 {lead.updatedAt && (
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 text-gray-500 mr-2" />
                     <span>Actualizado: {formatDate(lead.updatedAt)}</span>
+                  </div>
+                )}
+                {lead.accessStartDate && (
+                  <div className="flex items-center">
+                    <Calendar className="h-4 w-4 text-green-500 mr-2" />
+                    <span>
+                      Acceso desde: {formatDate(lead.accessStartDate)}
+                    </span>
+                  </div>
+                )}
+                {lead.accessEndDate && (
+                  <div className="flex items-center">
+                    <Calendar className="h-4 w-4 text-red-500 mr-2" />
+                    <span>Acceso hasta: {formatDate(lead.accessEndDate)}</span>
                   </div>
                 )}
               </div>
@@ -400,7 +349,7 @@ export default function LeadDetailsPage() {
                     })
                   }
                   className="w-full border rounded-md p-2 h-32 resize-none"
-                  placeholder="Añadir notas sobre este lead..."
+                  placeholder="Añadir notas sobre este estudiante..."
                 />
               ) : (
                 <p className="whitespace-pre-wrap">
@@ -411,65 +360,131 @@ export default function LeadDetailsPage() {
           </CardContent>
         </Card>
 
-        {/* Details sidebar - UPDATED */}
+        {/* Details sidebar */}
         <Card>
           <CardHeader>
-            <CardTitle>Información del Negocio</CardTitle>
+            <CardTitle>Información del Estudiante</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* NEW: Business Type */}
+            {/* Country Information */}
             <div>
-              <div className="text-sm text-gray-500 mb-1">Tipo de Negocio</div>
+              <div className="text-sm text-gray-500 mb-1">País</div>
               <div className="flex items-center gap-2">
-                {businessDetails.icon}
+                <MapPin className="h-4 w-4" />
                 <div>
-                  <div className="font-medium">{businessDetails.label}</div>
-                  <Badge className={`${businessDetails.color} text-xs mt-1`}>
-                    {lead.role?.toUpperCase()}
-                  </Badge>
+                  <div className="font-medium">{lead.country}</div>
+                  {lead.registrationDate && (
+                    <div className="text-xs text-gray-600">
+                      Fecha de registro: {lead.registrationDate}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* NEW: Investment Analysis for $200 system */}
+            {/* Blofin Investment Analysis */}
             <div>
               <div className="text-sm text-gray-500 mb-1">
-                Capacidad de Inversión ($200 USD)
+                Estado de Inversión Blofin
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  {investmentAnalysis.icon}
+                  {blofinAnalysis.icon}
                   <div>
-                    <div className="font-medium">
-                      {investmentAnalysis.level}
-                    </div>
+                    <div className="font-medium">{blofinAnalysis.level}</div>
                     <div className="text-sm text-gray-600">
-                      {investmentAnalysis.description}
+                      {blofinAnalysis.description}
                     </div>
                   </div>
                 </div>
-                <Badge className={investmentAnalysis.color}>
-                  {investmentAnalysis.priority}
+                <Badge className={blofinAnalysis.color}>
+                  {blofinAnalysis.priority}
                 </Badge>
-                {/* Full investment text */}
-                <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
-                  "{lead.investment}"
-                </div>
+
+                {/* Investment Details */}
+                {lead.blofinInvestmentCompleted && (
+                  <div className="bg-green-50 p-3 rounded-lg">
+                    <div className="text-sm font-medium text-green-800">
+                      Inversión Completada
+                    </div>
+                    <div className="text-sm text-green-700">
+                      Monto: {lead.blofinInvestmentAmount}{" "}
+                      {lead.blofinInvestmentCurrency}
+                    </div>
+                    {lead.blofinProofUploaded && (
+                      <div className="text-xs text-green-600 mt-1">
+                        ✅ Comprobante subido
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Legacy fields (kept for backward compatibility) */}
-            {lead.level && lead.level !== "business" && (
+            {/* Community Access */}
+            {lead.communityAccess && (
               <div>
-                <div className="text-sm text-gray-500 mb-1">Nivel</div>
-                <div className="font-medium">{lead.level}</div>
+                <div className="text-sm text-gray-500 mb-1">
+                  Acceso a Comunidades
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <Users className="h-3 w-3" />
+                    <span className="text-sm">Discord:</span>
+                    {lead.communityAccess.discord ? (
+                      <Badge
+                        variant="outline"
+                        className="text-green-600 border-green-200"
+                      >
+                        ✅ Activo
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-gray-500">
+                        ❌ Inactivo
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="h-3 w-3" />
+                    <span className="text-sm">Telegram:</span>
+                    {lead.communityAccess.telegram ? (
+                      <Badge
+                        variant="outline"
+                        className="text-green-600 border-green-200"
+                      >
+                        ✅ Activo
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-gray-500">
+                        ❌ Inactivo
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="h-3 w-3" />
+                    <span className="text-sm">WhatsApp:</span>
+                    {lead.communityAccess.whatsapp ? (
+                      <Badge
+                        variant="outline"
+                        className="text-green-600 border-green-200"
+                      >
+                        ✅ Activo
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-gray-500">
+                        ❌ Inactivo
+                      </Badge>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
 
-            {lead.software && lead.software !== "system" && (
+            {/* Source Information */}
+            {lead.source && (
               <div>
-                <div className="text-sm text-gray-500 mb-1">Software</div>
-                <div className="font-medium">{lead.software}</div>
+                <div className="text-sm text-gray-500 mb-1">Fuente</div>
+                <div className="font-medium">{lead.source}</div>
               </div>
             )}
           </CardContent>
@@ -478,48 +493,58 @@ export default function LeadDetailsPage() {
               variant="outline"
               className="w-full text-red-600 hover:bg-red-50 hover:text-red-700"
             >
-              <Trash2 className="h-4 w-4 mr-2" /> Eliminar Lead
+              <Trash2 className="h-4 w-4 mr-2" /> Eliminar Estudiante
             </Button>
           </CardFooter>
         </Card>
       </div>
 
-      {/* NEW: Business Description Card */}
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Building className="h-5 w-5" />
-            Descripción del Negocio
-          </CardTitle>
-          <CardDescription>
-            Detalles sobre el negocio y objetivos con el sistema
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <div className="whitespace-pre-wrap text-gray-800">
-              {lead.why ||
-                lead.clients ||
-                "No se proporcionó descripción del negocio"}
-            </div>
-          </div>
-          {/* Show both fields if they're different */}
-          {lead.why && lead.clients && lead.why !== lead.clients && (
-            <div className="mt-4">
-              <div className="text-sm text-gray-500 mb-2">
-                Información adicional:
+      {/* Access Management Card - NEW */}
+      {lead.accessGranted && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              Gestión de Acceso al Curso
+            </CardTitle>
+            <CardDescription>
+              Control del acceso del estudiante a los contenidos del curso
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-green-50 p-4 rounded-lg">
+                <div className="text-sm text-green-600 mb-1">
+                  Estado de Acceso
+                </div>
+                <div className="font-medium text-green-800">Acceso Activo</div>
+                <div className="text-sm text-green-700 mt-1">
+                  Desde: {formatDate(lead.accessStartDate)}
+                </div>
+                <div className="text-sm text-green-700">
+                  Hasta: {formatDate(lead.accessEndDate)}
+                </div>
               </div>
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <div className="whitespace-pre-wrap text-gray-800">
-                  {lead.clients}
+
+              <div className="space-y-2">
+                <div className="text-sm text-gray-500">
+                  Acciones Disponibles
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Button variant="outline" size="sm">
+                    Extender Acceso
+                  </Button>
+                  <Button variant="outline" size="sm" className="text-red-600">
+                    Revocar Acceso
+                  </Button>
                 </div>
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
-      <SalesInfoComponent
+      <StudentInfoComponent
         lead={lead}
         isLoading={isLoading}
         onLeadUpdate={() => {

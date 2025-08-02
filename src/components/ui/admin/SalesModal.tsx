@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { createSale } from "@/lib/firebase/sales";
-import { updateLead } from "@/lib/firebase/db";
-import { uploadPaymentProof } from "@/lib/firebase/storage";
-import { PAYMENT_PLANS } from "@/types/sales";
-import { FileUpload } from "@/components/ui/FileUpload";
+import {
+  updateLead,
+  updateBlofinInvestment,
+  updateCommunityAccess,
+} from "@/lib/firebase/db";
 import {
   Dialog,
   DialogContent,
@@ -26,173 +26,137 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  UserCheck,
   DollarSign,
-  CreditCard,
   AlertCircle,
-  Upload,
-  FileImage,
+  Users,
+  CheckCircle,
+  Globe,
+  MessageSquare,
+  Clock,
+  XCircle,
 } from "lucide-react";
 
-interface SaleModalProps {
+interface StudentStatusModalProps {
   isOpen: boolean;
   onClose: () => void;
   lead: {
     id: string;
     name: string;
     email: string;
-    investment: string;
+    country: string;
+    status:
+      | "student_pending"
+      | "student_active"
+      | "student_inactive"
+      | "rejected";
+    blofinAccountCreated?: boolean;
+    blofinInvestmentCompleted?: boolean;
   };
   onSuccess: () => void;
 }
 
-export default function SaleModal({
+export default function StudentStatusModal({
   isOpen,
   onClose,
   lead,
   onSuccess,
-}: SaleModalProps) {
+}: StudentStatusModalProps) {
   const { userProfile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<
+    "status" | "investment" | "community"
+  >("status");
 
-  // File upload states
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadingFile, setUploadingFile] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadError, setUploadError] = useState<string | null>(null);
+  // Status update form
+  const [statusForm, setStatusForm] = useState<{
+    newStatus:
+      | "student_pending"
+      | "student_active"
+      | "student_inactive"
+      | "rejected";
+    notes: string;
+    createBlofinAccount: boolean;
+  }>({
+    newStatus: lead.status,
+    notes: "",
+    createBlofinAccount: false,
+  });
 
-  const [formData, setFormData] = useState<{
-    product: "acceso_curso" | "others";
-    paymentPlan: keyof typeof PAYMENT_PLANS;
-    customAmount: string;
-    initialPayment: string;
-    hasInitialPayment: boolean;
-    paymentDescription: string;
+  // Investment form
+  const [investmentForm, setInvestmentForm] = useState<{
+    amount: string;
+    currency: "USD" | "PEN";
+    completed: boolean;
     notes: string;
   }>({
-    product: "acceso_curso",
-    paymentPlan: "1_pago",
-    customAmount: "",
-    initialPayment: "",
-    hasInitialPayment: false,
-    paymentDescription: "",
+    amount: "",
+    currency: "USD",
+    completed: false,
     notes: "",
   });
 
-  const getRecommendedPlan = () => {
-    const investment = lead.investment.toLowerCase();
-    if (
-      investment.includes("sí, tengo acceso") ||
-      investment.includes("tengo dinero")
-    ) {
-      return "1_pago";
-    } else if (investment.includes("puedo conseguirlo")) {
-      return "2_pagos";
-    } else {
-      return "3_pagos";
-    }
-  };
+  // Community access form
+  const [communityForm, setCommunityForm] = useState<{
+    discord: boolean;
+    telegram: boolean;
+    whatsapp: boolean;
+    notes: string;
+  }>({
+    discord: false,
+    telegram: false,
+    whatsapp: false,
+    notes: "",
+  });
 
   React.useEffect(() => {
     if (isOpen) {
-      const recommended = getRecommendedPlan();
-      setFormData({
-        product: "acceso_curso",
-        paymentPlan: recommended as keyof typeof PAYMENT_PLANS,
-        customAmount: "",
-        initialPayment: "",
-        hasInitialPayment: false,
-        paymentDescription: "",
+      setStatusForm({
+        newStatus: lead.status,
+        notes: "",
+        createBlofinAccount: false,
+      });
+      setInvestmentForm({
+        amount: "",
+        currency: "USD",
+        completed: false,
+        notes: "",
+      });
+      setCommunityForm({
+        discord: false,
+        telegram: false,
+        whatsapp: false,
         notes: "",
       });
       setError(null);
-      setSelectedFile(null);
-      setUploadError(null);
-      setUploadProgress(0);
+      setActiveTab("status");
     }
-  }, [isOpen, lead.investment]);
+  }, [isOpen, lead]);
 
-  const getTotalAmount = () => {
-    if (formData.customAmount) {
-      return parseFloat(formData.customAmount) || 0;
-    }
-    return PAYMENT_PLANS[formData.paymentPlan].amount;
-  };
-
-  const getInitialPayment = () => {
-    if (formData.initialPayment) {
-      return parseFloat(formData.initialPayment) || 0;
-    }
-
-    const totalAmount = getTotalAmount();
-
-    // Default initial payment based on plan
-    switch (formData.paymentPlan) {
-      case "1_pago":
-        return totalAmount;
-      case "2_pagos":
-        return Math.round(totalAmount / 2);
-      case "3_pagos":
-        return Math.round(totalAmount / 3);
-      default:
-        return 0;
+  const getStatusRecommendation = () => {
+    if (lead.blofinInvestmentCompleted) {
+      return {
+        status: "student_active",
+        message: "Estudiante completó inversión - Recomendado: Activar",
+        color: "green",
+      };
+    } else if (lead.blofinAccountCreated) {
+      return {
+        status: "student_pending",
+        message: "Estudiante creó cuenta - Esperando inversión",
+        color: "yellow",
+      };
+    } else {
+      return {
+        status: "student_pending",
+        message: "Estudiante nuevo - Necesita crear cuenta Blofin",
+        color: "blue",
+      };
     }
   };
 
-  const handleFileSelected = (file: File) => {
-    setSelectedFile(file);
-    setUploadError(null);
-  };
-
-  const handleFileRemoved = () => {
-    setSelectedFile(null);
-    setUploadError(null);
-  };
-
-  const uploadPaymentProofFile = async (
-    saleId: string
-  ): Promise<string | null> => {
-    if (!selectedFile || !userProfile) return null;
-
-    try {
-      setUploadingFile(true);
-      setUploadError(null);
-
-      // Simulate upload progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 15;
-        });
-      }, 200);
-
-      // Upload file to Firebase Storage
-      const imageUrl = await uploadPaymentProof(
-        selectedFile,
-        saleId,
-        userProfile.uid
-      );
-
-      // Complete progress
-      clearInterval(progressInterval);
-      setUploadProgress(100);
-
-      return imageUrl;
-    } catch (error) {
-      console.error("Error uploading payment proof:", error);
-      setUploadError(
-        error instanceof Error ? error.message : "Error al subir el archivo"
-      );
-      return null;
-    } finally {
-      setUploadingFile(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleStatusUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!userProfile) {
@@ -200,80 +164,18 @@ export default function SaleModal({
       return;
     }
 
-    const totalAmount = getTotalAmount();
-    const initialPayment = formData.hasInitialPayment ? getInitialPayment() : 0;
-
-    if (totalAmount <= 0) {
-      setError("El monto total debe ser mayor a 0");
-      return;
-    }
-
-    if (formData.hasInitialPayment && initialPayment > totalAmount) {
-      setError("El pago inicial no puede ser mayor al monto total");
-      return;
-    }
-
-    if (formData.hasInitialPayment && initialPayment > 0 && !selectedFile) {
-      setError("Debes subir un comprobante de pago para el pago inicial");
-      return;
-    }
-
     try {
       setLoading(true);
       setError(null);
 
-      // Create the sale first
-      const saleData = {
-        leadId: lead.id,
-        saleUserId: userProfile.uid,
-        product: formData.product,
-        paymentPlan: formData.paymentPlan,
-        totalAmount,
-        paidAmount: 0, // Will be updated after uploading proof
-        paymentProofs: [],
-        accessGranted: false,
-        accessStartDate: null,
-        accessEndDate: null,
-        exemptionGranted: false,
-      };
-
-      const saleId = await createSale(saleData);
-
-      // Upload payment proof if there's an initial payment
-      let imageUrl = "";
-      if (formData.hasInitialPayment && initialPayment > 0 && selectedFile) {
-        const uploadResult = await uploadPaymentProofFile(saleId);
-
-        if (uploadResult) {
-          imageUrl = uploadResult;
-        } else {
-          // If upload failed, still create the sale but show warning
-          console.warn("Payment proof upload failed, but sale was created");
-        }
-      }
-
-      // If there's an initial payment, add it to the sale
-      if (formData.hasInitialPayment && initialPayment > 0) {
-        const { addPaymentProof } = await import("@/lib/firebase/sales");
-
-        const paymentProof = {
-          amount: initialPayment,
-          imageUrl: imageUrl || "", // Handle null case by providing empty string fallback
-          uploadedBy: userProfile.uid, // Add required uploadedBy field
-          description:
-            formData.paymentDescription ||
-            "Pago inicial registrado en la creación de la venta",
-        };
-
-        await addPaymentProof(saleId, paymentProof, userProfile.uid);
-      }
-
-      // Update lead status to 'sale'
+      // Update lead status
       await updateLead(
         lead.id,
         {
-          status: "sale",
-          saleId,
+          status: statusForm.newStatus,
+          blofinAccountCreated:
+            statusForm.createBlofinAccount || lead.blofinAccountCreated,
+          notes: statusForm.notes || undefined,
         },
         userProfile.uid
       );
@@ -281,52 +183,116 @@ export default function SaleModal({
       onSuccess();
       onClose();
     } catch (err) {
-      console.error("Error creating sale:", err);
-      setError(err instanceof Error ? err.message : "Error al crear la venta");
+      console.error("Error updating student status:", err);
+      setError(
+        err instanceof Error ? err.message : "Error al actualizar estado"
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  const getInvestmentRecommendation = () => {
-    const investment = lead.investment.toLowerCase();
-    if (
-      investment.includes("sí, tengo acceso") ||
-      investment.includes("tengo dinero")
-    ) {
-      return {
-        type: "success",
-        message:
-          "Cliente tiene acceso inmediato al dinero - Recomendado: 1 pago",
-        plan: "1_pago",
+  const handleInvestmentUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!userProfile || !investmentForm.amount) {
+      setError("Por favor completa todos los campos requeridos");
+      return;
+    }
+
+    const amount = parseFloat(investmentForm.amount);
+    const minAmount = investmentForm.currency === "USD" ? 30 : 100;
+
+    if (amount < minAmount) {
+      setError(
+        `El monto mínimo es ${
+          investmentForm.currency === "USD" ? "$30 USD" : "S/100 PEN"
+        }`
+      );
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const investmentData = {
+        amount,
+        currency: investmentForm.currency,
+        completed: investmentForm.completed,
       };
-    } else if (investment.includes("puedo conseguirlo")) {
-      return {
-        type: "warning",
-        message: "Cliente puede conseguir el dinero - Recomendado: 2 pagos",
-        plan: "2_pagos",
-      };
-    } else {
-      return {
-        type: "info",
-        message: "Cliente necesita tiempo - Recomendado: 3 pagos",
-        plan: "3_pagos",
-      };
+
+      await updateBlofinInvestment(lead.id, investmentData, userProfile.uid);
+
+      onSuccess();
+      onClose();
+    } catch (err) {
+      console.error("Error updating investment:", err);
+      setError(
+        err instanceof Error ? err.message : "Error al actualizar inversión"
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
-  const recommendation = getInvestmentRecommendation();
+  const handleCommunityUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!userProfile) {
+      setError("Usuario no autenticado");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Update each community access
+      const updates = [];
+
+      if (communityForm.discord) {
+        updates.push(
+          updateCommunityAccess(lead.id, "discord", true, userProfile.uid)
+        );
+      }
+      if (communityForm.telegram) {
+        updates.push(
+          updateCommunityAccess(lead.id, "telegram", true, userProfile.uid)
+        );
+      }
+      if (communityForm.whatsapp) {
+        updates.push(
+          updateCommunityAccess(lead.id, "whatsapp", true, userProfile.uid)
+        );
+      }
+
+      await Promise.all(updates);
+
+      onSuccess();
+      onClose();
+    } catch (err) {
+      console.error("Error updating community access:", err);
+      setError(
+        err instanceof Error ? err.message : "Error al actualizar acceso"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const recommendation = getStatusRecommendation();
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center">
-            <DollarSign className="mr-2 h-5 w-5 text-green-600" />
-            Crear Venta
+            <UserCheck className="mr-2 h-5 w-5 text-blue-600" />
+            Gestionar Estudiante
           </DialogTitle>
           <DialogDescription>
-            Convertir lead a venta para {lead.name}
+            Actualizar información y estado de {lead.name}
           </DialogDescription>
         </DialogHeader>
 
@@ -337,238 +303,388 @@ export default function SaleModal({
           </div>
         )}
 
-        {/* Investment Analysis */}
+        {/* Student Analysis */}
         <div
           className={`p-3 rounded-md text-sm ${
-            recommendation.type === "success"
+            recommendation.color === "green"
               ? "bg-green-50 text-green-800"
-              : recommendation.type === "warning"
+              : recommendation.color === "yellow"
               ? "bg-yellow-50 text-yellow-800"
               : "bg-blue-50 text-blue-800"
           }`}
         >
-          <p className="font-medium">Análisis de Inversión:</p>
-          <p className="mt-1 text-xs italic">"{lead.investment}"</p>
+          <p className="font-medium">Estado Actual:</p>
+          <p className="mt-1 text-xs">
+            País: {lead.country} | Estado: {lead.status}
+          </p>
           <p className="mt-1 font-medium">{recommendation.message}</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Product Selection */}
+        {/* Tab Navigation */}
+        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+          <button
+            onClick={() => setActiveTab("status")}
+            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+              activeTab === "status"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Estado
+          </button>
+          <button
+            onClick={() => setActiveTab("investment")}
+            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+              activeTab === "investment"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Inversión
+          </button>
+          <button
+            onClick={() => setActiveTab("community")}
+            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+              activeTab === "community"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Comunidad
+          </button>
+        </div>
+
+        {/* Status Tab */}
+        {activeTab === "status" && (
+          <form onSubmit={handleStatusUpdate} className="space-y-4">
             <div>
-              <Label htmlFor="product">Producto</Label>
+              <Label htmlFor="newStatus">Nuevo Estado</Label>
               <Select
-                value={formData.product}
-                onValueChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    product: value as "acceso_curso" | "others",
-                  })
+                value={statusForm.newStatus}
+                onValueChange={(value: any) =>
+                  setStatusForm({ ...statusForm, newStatus: value })
                 }
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="acceso_curso">
-                    Acceso al Curso (120 días)
+                  <SelectItem value="student_pending">
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-2 text-blue-500" />
+                      Estudiante Pendiente
+                    </div>
                   </SelectItem>
-                  <SelectItem value="others">Otro Producto</SelectItem>
+                  <SelectItem value="student_active">
+                    <div className="flex items-center">
+                      <CheckCircle className="h-4 w-4 mr-2 text-green-500" />
+                      Estudiante Activo
+                      {recommendation.status === "student_active" && (
+                        <span className="ml-2 text-xs bg-green-100 text-green-600 px-1 rounded">
+                          Recomendado
+                        </span>
+                      )}
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="student_inactive">
+                    <div className="flex items-center">
+                      <AlertCircle className="h-4 w-4 mr-2 text-amber-500" />
+                      Estudiante Inactivo
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="rejected">
+                    <div className="flex items-center">
+                      <XCircle className="h-4 w-4 mr-2 text-red-500" />
+                      Rechazado
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Payment Plan */}
+            {!lead.blofinAccountCreated && (
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="createBlofinAccount"
+                  checked={statusForm.createBlofinAccount}
+                  onCheckedChange={(checked) =>
+                    setStatusForm({
+                      ...statusForm,
+                      createBlofinAccount: checked as boolean,
+                    })
+                  }
+                />
+                <Label htmlFor="createBlofinAccount" className="text-sm">
+                  Marcar cuenta Blofin como creada
+                </Label>
+              </div>
+            )}
+
             <div>
-              <Label htmlFor="paymentPlan">Plan de Pago</Label>
-              <Select
-                value={formData.paymentPlan}
-                onValueChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    paymentPlan: value as keyof typeof PAYMENT_PLANS,
+              <Label htmlFor="statusNotes">Notas del Cambio</Label>
+              <Textarea
+                id="statusNotes"
+                placeholder="Motivo del cambio de estado, observaciones..."
+                value={statusForm.notes}
+                onChange={(e) =>
+                  setStatusForm({ ...statusForm, notes: e.target.value })
+                }
+                rows={3}
+              />
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={loading}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? "Actualizando..." : "Actualizar Estado"}
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
+
+        {/* Investment Tab */}
+        {activeTab === "investment" && (
+          <form onSubmit={handleInvestmentUpdate} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="invAmount">Monto de Inversión</Label>
+                <Input
+                  id="invAmount"
+                  type="number"
+                  step="0.01"
+                  value={investmentForm.amount}
+                  onChange={(e) =>
+                    setInvestmentForm({
+                      ...investmentForm,
+                      amount: e.target.value,
+                    })
+                  }
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="invCurrency">Moneda</Label>
+                <Select
+                  value={investmentForm.currency}
+                  onValueChange={(value: "USD" | "PEN") =>
+                    setInvestmentForm({
+                      ...investmentForm,
+                      currency: value,
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USD">USD (Mín: $30)</SelectItem>
+                    <SelectItem value="PEN">PEN (Mín: S/100)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="invCompleted"
+                checked={investmentForm.completed}
+                onCheckedChange={(checked) =>
+                  setInvestmentForm({
+                    ...investmentForm,
+                    completed: checked as boolean,
                   })
                 }
+              />
+              <Label htmlFor="invCompleted" className="text-sm">
+                Marcar inversión como completada
+              </Label>
+            </div>
+
+            <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-md">
+              <p className="font-medium">Información importante:</p>
+              <p>
+                • Al completar la inversión mínima, se otorgará acceso
+                automáticamente
+              </p>
+              <p>• El estudiante recibirá acceso al curso por 120 días</p>
+            </div>
+
+            <div>
+              <Label htmlFor="invNotes">Notas de la Inversión</Label>
+              <Textarea
+                id="invNotes"
+                placeholder="Detalles sobre la inversión, método de pago..."
+                value={investmentForm.notes}
+                onChange={(e) =>
+                  setInvestmentForm({
+                    ...investmentForm,
+                    notes: e.target.value,
+                  })
+                }
+                rows={3}
+              />
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={loading}
               >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(PAYMENT_PLANS).map(([key, plan]) => (
-                    <SelectItem key={key} value={key}>
-                      <div className="flex items-center justify-between w-full">
-                        <span>{plan.label}</span>
-                        {key === recommendation.plan && (
-                          <span className="ml-2 text-xs bg-green-100 text-green-600 px-1 rounded">
-                            Recomendado
-                          </span>
-                        )}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={loading || !investmentForm.amount}
+              >
+                {loading ? "Actualizando..." : "Actualizar Inversión"}
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
 
-          {/* Custom Amount */}
-          <div>
-            <Label htmlFor="customAmount">Monto Personalizado (opcional)</Label>
-            <Input
-              id="customAmount"
-              type="number"
-              placeholder={`Predeterminado: $${
-                PAYMENT_PLANS[formData.paymentPlan].amount
-              }`}
-              value={formData.customAmount}
-              onChange={(e) =>
-                setFormData({ ...formData, customAmount: e.target.value })
-              }
-              min="0"
-              step="0.01"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Monto total:{" "}
-              <span className="font-medium">
-                ${getTotalAmount().toLocaleString()}
-              </span>
-            </p>
-          </div>
+        {/* Community Tab */}
+        {activeTab === "community" && (
+          <form onSubmit={handleCommunityUpdate} className="space-y-4">
+            <div className="space-y-3">
+              <Label>Otorgar Acceso a Comunidades</Label>
 
-          {/* Initial Payment Checkbox */}
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="hasInitialPayment"
-              checked={formData.hasInitialPayment}
-              onCheckedChange={(checked) =>
-                setFormData({
-                  ...formData,
-                  hasInitialPayment: checked as boolean,
-                  initialPayment: checked ? formData.initialPayment : "",
-                  paymentDescription: checked
-                    ? formData.paymentDescription
-                    : "",
-                })
-              }
-            />
-            <Label htmlFor="hasInitialPayment" className="text-sm font-medium">
-              Cliente realizó un pago inicial
-            </Label>
-          </div>
-
-          {/* Initial Payment Fields - Only show if checkbox is checked */}
-          {formData.hasInitialPayment && (
-            <div className="space-y-4 p-4 bg-gray-50 rounded-lg border">
-              <div className="flex items-center space-x-2 mb-3">
-                <FileImage className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-gray-700">
-                  Información del Pago Inicial
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Initial Payment Amount */}
-                <div>
-                  <Label htmlFor="initialPayment">Monto del Pago</Label>
-                  <Input
-                    id="initialPayment"
-                    type="number"
-                    placeholder={`Sugerido: $${getInitialPayment()}`}
-                    value={formData.initialPayment}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        initialPayment: e.target.value,
-                      })
-                    }
-                    min="0"
-                    max={getTotalAmount()}
-                    step="0.01"
-                    required={formData.hasInitialPayment}
-                  />
-                </div>
-
-                {/* Payment Description */}
-                <div>
-                  <Label htmlFor="paymentDescription">
-                    Descripción del Pago (opcional)
-                  </Label>
-                  <Input
-                    id="paymentDescription"
-                    placeholder="Ej: Pago por transferencia"
-                    value={formData.paymentDescription}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        paymentDescription: e.target.value,
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                  <Checkbox
+                    id="discordAccess"
+                    checked={communityForm.discord}
+                    onCheckedChange={(checked) =>
+                      setCommunityForm({
+                        ...communityForm,
+                        discord: checked as boolean,
                       })
                     }
                   />
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2">
+                      <MessageSquare className="h-4 w-4 text-purple-600" />
+                      <Label htmlFor="discordAccess" className="font-medium">
+                        Discord
+                      </Label>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      Comunidad principal de estudiantes
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                  <Checkbox
+                    id="telegramAccess"
+                    checked={communityForm.telegram}
+                    onCheckedChange={(checked) =>
+                      setCommunityForm({
+                        ...communityForm,
+                        telegram: checked as boolean,
+                      })
+                    }
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2">
+                      <MessageSquare className="h-4 w-4 text-blue-600" />
+                      <Label htmlFor="telegramAccess" className="font-medium">
+                        Telegram
+                      </Label>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      Grupo de avisos y notificaciones
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-3 p-3 border rounded-lg">
+                  <Checkbox
+                    id="whatsappAccess"
+                    checked={communityForm.whatsapp}
+                    onCheckedChange={(checked) =>
+                      setCommunityForm({
+                        ...communityForm,
+                        whatsapp: checked as boolean,
+                      })
+                    }
+                  />
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2">
+                      <MessageSquare className="h-4 w-4 text-green-600" />
+                      <Label htmlFor="whatsappAccess" className="font-medium">
+                        WhatsApp
+                      </Label>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      Soporte directo y consultas
+                    </p>
+                  </div>
                 </div>
               </div>
-
-              {/* File Upload */}
-              <div>
-                <Label>Comprobante de Pago</Label>
-                <FileUpload
-                  onFileSelected={handleFileSelected}
-                  onFileRemoved={handleFileRemoved}
-                  isUploading={uploadingFile}
-                  uploadProgress={uploadProgress}
-                  disabled={loading}
-                  maxSize={5}
-                  placeholder="Selecciona el comprobante de pago"
-                  error={uploadError || undefined}
-                />
-                {formData.hasInitialPayment && (
-                  <p className="text-xs text-gray-600 mt-1">
-                    <span className="text-red-500">*</span> Requerido para pagos
-                    iniciales
-                  </p>
-                )}
-              </div>
             </div>
-          )}
 
-          {/* Notes */}
-          <div>
-            <Label htmlFor="notes">Notas Adicionales (opcional)</Label>
-            <Textarea
-              id="notes"
-              placeholder="Detalles adicionales sobre la venta, acuerdos especiales, etc."
-              value={formData.notes}
-              onChange={(e) =>
-                setFormData({ ...formData, notes: e.target.value })
-              }
-              rows={3}
-            />
-          </div>
+            <div>
+              <Label htmlFor="communityNotes">Notas del Acceso</Label>
+              <Textarea
+                id="communityNotes"
+                placeholder="Observaciones sobre el acceso a comunidades..."
+                value={communityForm.notes}
+                onChange={(e) =>
+                  setCommunityForm({
+                    ...communityForm,
+                    notes: e.target.value,
+                  })
+                }
+                rows={3}
+              />
+            </div>
 
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={loading}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={loading || uploadingFile}
-              className="min-w-[120px]"
-            >
-              {loading ? (
-                <>Creando...</>
-              ) : (
-                <>
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Crear Venta
-                </>
-              )}
-            </Button>
-          </DialogFooter>
-        </form>
+            <div className="text-sm text-gray-600 bg-yellow-50 p-3 rounded-md">
+              <p className="font-medium">Nota:</p>
+              <p>
+                • Solo selecciona las comunidades a las que quieres otorgar
+                acceso
+              </p>
+              <p>
+                • Para revocar acceso, usa la gestión individual en la pestaña
+                principal
+              </p>
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={loading}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={
+                  loading ||
+                  (!communityForm.discord &&
+                    !communityForm.telegram &&
+                    !communityForm.whatsapp)
+                }
+              >
+                {loading ? "Actualizando..." : "Otorgar Acceso"}
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );

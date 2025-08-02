@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { Lead } from "@/lib/firebase/db";
-import { getSaleByLeadId, addPaymentProof } from "@/lib/firebase/sales";
-import { uploadPaymentProof } from "@/lib/firebase/storage";
-import { Sale, PaymentProof } from "@/types/sales";
+import {
+  Lead,
+  updateBlofinInvestment,
+  updateCommunityAccess,
+} from "@/lib/firebase/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { FileUpload } from "@/components/ui/FileUpload";
 import {
   Dialog,
   DialogContent,
@@ -21,10 +21,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   DollarSign,
   CreditCard,
   Calendar,
-  FileImage,
   CheckCircle,
   Clock,
   Upload,
@@ -32,33 +38,41 @@ import {
   AlertCircle,
   TrendingUp,
   UserCheck,
+  Users,
+  Building,
+  Globe,
+  PlayCircle,
+  BookOpen,
+  MessageSquare,
 } from "lucide-react";
 
-interface SalesInfoComponentProps {
+interface StudentInfoComponentProps {
   lead: Lead | null;
   onLeadUpdate?: () => void;
   isLoading?: boolean;
 }
 
-export default function SalesInfoComponent({
+export default function StudentInfoComponent({
   lead,
   onLeadUpdate,
   isLoading = false,
-}: SalesInfoComponentProps) {
+}: StudentInfoComponentProps) {
   const { userProfile, hasPermission } = useAuth();
-  const [sale, setSale] = useState<Sale | null>(null);
-  const [loadingSale, setLoadingSale] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [uploadingPayment, setUploadingPayment] = useState(false);
+  const [showInvestmentModal, setShowInvestmentModal] = useState(false);
+  const [showCommunityModal, setShowCommunityModal] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const [paymentForm, setPaymentForm] = useState({
+  const [investmentForm, setInvestmentForm] = useState({
     amount: "",
-    description: "",
+    currency: "USD" as "USD" | "PEN",
+    completed: false,
   });
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadingFile, setUploadingFile] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const [communityForm, setCommunityForm] = useState({
+    type: "discord" as "discord" | "telegram" | "whatsapp",
+    granted: true,
+  });
 
   // Utility function to safely convert any date format to JavaScript Date
   const toJsDate = (date: any): Date | null => {
@@ -77,107 +91,89 @@ export default function SalesInfoComponent({
     }
   };
 
-  const loadSaleData = async () => {
-    if (!lead?.id) return;
+  const canManageStudent = () => {
+    if (!userProfile) return false;
 
-    try {
-      setLoadingSale(true);
-      const saleData = await getSaleByLeadId(lead.id);
-      setSale(saleData);
-    } catch (error) {
-      console.error("Error loading sale data:", error);
-    } finally {
-      setLoadingSale(false);
-    }
-  };
-
-  // Load sale data when lead changes and has sale status
-  useEffect(() => {
-    if (lead && lead.status === "sale" && lead.saleId) {
-      loadSaleData();
-    } else {
-      setSale(null);
-    }
-  }, [lead?.id, lead?.status, lead?.saleId]);
-
-  const canEditPayments = () => {
-    if (!userProfile || !sale) return false;
-
-    // Super admin and admin can always edit
+    // Super admin and admin can always manage
     if (userProfile.role === "super_admin" || userProfile.role === "admin") {
       return true;
     }
 
-    // Check if current user is the one who made the sale
-    if (sale.saleUserId === userProfile.uid) {
+    // CRM users can manage students
+    if (userProfile.role === "crm_user") {
       return true;
     }
 
     return false;
   };
 
-  const handleAddPaymentProof = async (e: React.FormEvent) => {
+  const handleUpdateInvestment = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!sale || !userProfile || !paymentForm.amount || !selectedFile) {
-      setUploadError("Por favor completa todos los campos requeridos");
+    if (!lead || !userProfile || !investmentForm.amount) {
+      setError("Por favor completa todos los campos requeridos");
       return;
     }
 
     try {
-      setUploadingPayment(true);
-      setUploadingFile(true);
-      setUploadError(null);
+      setUpdating(true);
+      setError(null);
 
-      // Simulate upload progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval);
-            return 90;
-          }
-          return prev + 10;
-        });
-      }, 200);
-
-      // Upload file to Firebase Storage
-      const imageUrl = await uploadPaymentProof(
-        selectedFile,
-        sale.id!,
-        userProfile.uid
-      );
-
-      // Complete progress
-      clearInterval(progressInterval);
-      setUploadProgress(100);
-
-      const paymentProof: Omit<PaymentProof, "id" | "uploadedAt"> = {
-        amount: parseFloat(paymentForm.amount),
-        imageUrl,
-        uploadedBy: userProfile.uid,
-        description: paymentForm.description,
+      const investmentData = {
+        amount: parseFloat(investmentForm.amount),
+        currency: investmentForm.currency,
+        completed: investmentForm.completed,
       };
 
-      await addPaymentProof(sale.id!, paymentProof, userProfile.uid);
-
-      // Reload sale data
-      await loadSaleData();
+      await updateBlofinInvestment(lead.id!, investmentData, userProfile.uid);
 
       // Reset form and close modal
-      setPaymentForm({ amount: "", description: "" });
-      setSelectedFile(null);
-      setUploadProgress(0);
-      setShowPaymentModal(false);
+      setInvestmentForm({ amount: "", currency: "USD", completed: false });
+      setShowInvestmentModal(false);
 
       if (onLeadUpdate) onLeadUpdate();
     } catch (error) {
-      console.error("Error adding payment proof:", error);
-      setUploadError(
-        error instanceof Error ? error.message : "Failed to add payment"
+      console.error("Error updating investment:", error);
+      setError(
+        error instanceof Error ? error.message : "Failed to update investment"
       );
     } finally {
-      setUploadingPayment(false);
-      setUploadingFile(false);
+      setUpdating(false);
+    }
+  };
+
+  const handleUpdateCommunityAccess = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!lead || !userProfile) {
+      setError("Error en la configuración");
+      return;
+    }
+
+    try {
+      setUpdating(true);
+      setError(null);
+
+      await updateCommunityAccess(
+        lead.id!,
+        communityForm.type,
+        communityForm.granted,
+        userProfile.uid
+      );
+
+      // Close modal
+      setShowCommunityModal(false);
+
+      if (onLeadUpdate) onLeadUpdate();
+    } catch (error) {
+      console.error("Error updating community access:", error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to update community access"
+      );
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -194,23 +190,33 @@ export default function SalesInfoComponent({
     });
   };
 
-  const getPaymentProgress = () => {
-    if (!sale) return 0;
-    return (sale.paidAmount / sale.totalAmount) * 100;
-  };
+  const getStudentProgress = () => {
+    if (!lead) return 0;
 
-  const getRemainingAmount = () => {
-    if (!sale) return 0;
-    return sale.totalAmount - sale.paidAmount;
+    let progress = 0;
+
+    // Registration completed (always 25% since we have the lead)
+    progress += 25;
+
+    // Blofin account created
+    if (lead.blofinAccountCreated) progress += 25;
+
+    // Investment completed
+    if (lead.blofinInvestmentCompleted) progress += 25;
+
+    // Access granted
+    if (lead.accessGranted) progress += 25;
+
+    return progress;
   };
 
   const getAccessStatus = () => {
-    if (!sale) return null;
+    if (!lead) return null;
 
-    if (!sale.accessGranted) return "pending";
+    if (!lead.accessGranted) return "pending";
 
-    if (sale.accessEndDate) {
-      const endDate = toJsDate(sale.accessEndDate);
+    if (lead.accessEndDate) {
+      const endDate = toJsDate(lead.accessEndDate);
       if (endDate) {
         const now = new Date();
         return now > endDate ? "expired" : "active";
@@ -221,9 +227,9 @@ export default function SalesInfoComponent({
   };
 
   const getRemainingDays = () => {
-    if (!sale?.accessEndDate) return null;
+    if (!lead?.accessEndDate) return null;
 
-    const endDate = toJsDate(sale.accessEndDate);
+    const endDate = toJsDate(lead.accessEndDate);
     if (!endDate) return null;
 
     const now = new Date();
@@ -258,6 +264,10 @@ export default function SalesInfoComponent({
     }
   };
 
+  const getMinimumInvestment = (currency: "USD" | "PEN") => {
+    return currency === "USD" ? 30 : 100;
+  };
+
   // Show loading state if parent is still loading the lead
   if (isLoading) {
     return (
@@ -277,159 +287,156 @@ export default function SalesInfoComponent({
     return null;
   }
 
-  // If lead is not a sale, return basic info
-  if (lead.status !== "sale") {
-    return (
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <TrendingUp className="mr-2 h-5 w-5" />
-            Información de Venta
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-6 text-gray-500">
-            <CreditCard className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-            <p>Este lead aún no ha sido convertido a venta.</p>
-            {lead.status === "onboarding" && hasPermission("leads:write") && (
-              <p className="text-sm mt-2">
-                Puedes crear una venta desde la tabla de leads.
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (loadingSale) {
-    return (
-      <Card className="mt-6">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
-            <span className="ml-2">Cargando información de venta...</span>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!sale) {
-    return (
-      <Card className="mt-6">
-        <CardContent className="p-6">
-          <div className="text-center text-red-600">
-            <AlertCircle className="h-8 w-8 mx-auto mb-2" />
-            <p>Error al cargar la información de venta.</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
     <div className="mt-6 space-y-6">
-      {/* Sale Overview */}
+      {/* Student Progress Overview */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center">
-              <DollarSign className="mr-2 h-5 w-5 text-green-600" />
-              Información de Venta
+              <BookOpen className="mr-2 h-5 w-5 text-blue-600" />
+              Progreso del Estudiante
             </div>
             {getAccessStatusBadge()}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Payment Progress */}
+          {/* Progress Bar */}
           <div>
             <div className="flex justify-between items-center mb-2">
-              <Label>Progreso de Pago</Label>
+              <Label>Progreso de Incorporación</Label>
               <span className="text-sm font-medium">
-                ${sale.paidAmount.toLocaleString()} / $
-                {sale.totalAmount.toLocaleString()}
+                {getStudentProgress()}% completado
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
               <div
-                className="bg-green-500 h-3 rounded-full transition-all duration-300"
-                style={{ width: `${Math.min(getPaymentProgress(), 100)}%` }}
+                className="bg-blue-500 h-3 rounded-full transition-all duration-300"
+                style={{ width: `${getStudentProgress()}%` }}
               />
             </div>
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>{getPaymentProgress().toFixed(1)}% completado</span>
-              <span>Falta: ${getRemainingAmount().toLocaleString()}</span>
+            <div className="grid grid-cols-4 gap-2 text-xs text-center mt-2">
+              <div
+                className={
+                  lead ? "text-green-600 font-medium" : "text-gray-400"
+                }
+              >
+                ✓ Registro
+              </div>
+              <div
+                className={
+                  lead.blofinAccountCreated
+                    ? "text-green-600 font-medium"
+                    : "text-gray-400"
+                }
+              >
+                {lead.blofinAccountCreated ? "✓" : "○"} Cuenta Blofin
+              </div>
+              <div
+                className={
+                  lead.blofinInvestmentCompleted
+                    ? "text-green-600 font-medium"
+                    : "text-gray-400"
+                }
+              >
+                {lead.blofinInvestmentCompleted ? "✓" : "○"} Inversión
+              </div>
+              <div
+                className={
+                  lead.accessGranted
+                    ? "text-green-600 font-medium"
+                    : "text-gray-400"
+                }
+              >
+                {lead.accessGranted ? "✓" : "○"} Acceso
+              </div>
             </div>
           </div>
 
-          {/* Sale Details Grid */}
+          {/* Student Details Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <Label className="text-sm text-gray-500">Producto</Label>
+                <Label className="text-sm text-gray-500">Estado</Label>
                 <p className="font-medium">
-                  {sale.product === "acceso_curso"
-                    ? "Acceso al Curso (120 días)"
-                    : "Otro Producto"}
+                  {lead.status === "student_pending" && "Estudiante Pendiente"}
+                  {lead.status === "student_active" && "Estudiante Activo"}
+                  {lead.status === "student_inactive" && "Estudiante Inactivo"}
+                  {lead.status === "rejected" && "Rechazado"}
                 </p>
               </div>
 
               <div>
-                <Label className="text-sm text-gray-500">Plan de Pago</Label>
-                <p className="font-medium">
-                  {sale.paymentPlan.replace("_", " ").toUpperCase()}
-                </p>
-              </div>
-
-              <div>
-                <Label className="text-sm text-gray-500">Monto Total</Label>
-                <p className="font-medium text-lg text-green-600">
-                  ${sale.totalAmount.toLocaleString()}
-                </p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <Label className="text-sm text-gray-500">Fecha de Venta</Label>
-                <p className="font-medium">{formatDate(sale.createdAt)}</p>
+                <Label className="text-sm text-gray-500">País</Label>
+                <div className="flex items-center space-x-2">
+                  <Globe className="h-4 w-4 text-gray-500" />
+                  <p className="font-medium">{lead.country}</p>
+                </div>
               </div>
 
               <div>
                 <Label className="text-sm text-gray-500">
-                  Estado de Acceso
+                  Fecha de Registro
                 </Label>
-                <div className="space-y-1">
-                  {getAccessStatusBadge()}
-                  {sale.accessStartDate && (
-                    <p className="text-sm text-gray-600">
-                      Inicio: {formatDate(sale.accessStartDate)}
-                    </p>
+                <p className="font-medium">{formatDate(lead.createdAt)}</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm text-gray-500">Cuenta Blofin</Label>
+                <div className="flex items-center space-x-2">
+                  {lead.blofinAccountCreated ? (
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Clock className="h-4 w-4 text-gray-400" />
                   )}
-                  {sale.accessEndDate && (
-                    <p className="text-sm text-gray-600">
-                      {getAccessStatus() === "active"
-                        ? `Faltan ${getRemainingDays()} días`
-                        : `Expiró: ${formatDate(sale.accessEndDate)}`}
-                    </p>
-                  )}
+                  <p className="font-medium">
+                    {lead.blofinAccountCreated ? "Creada" : "Pendiente"}
+                  </p>
                 </div>
               </div>
 
-              {sale.exemptionGranted && (
+              <div>
+                <Label className="text-sm text-gray-500">
+                  Inversión en Blofin
+                </Label>
+                <div className="flex items-center space-x-2">
+                  {lead.blofinInvestmentCompleted ? (
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Clock className="h-4 w-4 text-gray-400" />
+                  )}
+                  <div>
+                    <p className="font-medium">
+                      {lead.blofinInvestmentCompleted
+                        ? "Completada"
+                        : "Pendiente"}
+                    </p>
+                    {lead.blofinInvestmentCompleted && (
+                      <p className="text-sm text-gray-600">
+                        {lead.blofinInvestmentAmount}{" "}
+                        {lead.blofinInvestmentCurrency}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {lead.accessStartDate && (
                 <div>
                   <Label className="text-sm text-gray-500">
-                    Exención Otorgada
+                    Acceso al Curso
                   </Label>
                   <div className="space-y-1">
-                    <Badge className="bg-blue-100 text-blue-800">
-                      <CheckCircle className="h-3 w-3 mr-1" />
-                      Exención Activa
-                    </Badge>
-                    {sale.exemptionReason && (
+                    <p className="text-sm text-gray-600">
+                      Inicio: {formatDate(lead.accessStartDate)}
+                    </p>
+                    {lead.accessEndDate && (
                       <p className="text-sm text-gray-600">
-                        {sale.exemptionReason}
+                        {getAccessStatus() === "active"
+                          ? `Faltan ${getRemainingDays()} días`
+                          : `Expiró: ${formatDate(lead.accessEndDate)}`}
                       </p>
                     )}
                   </div>
@@ -440,90 +447,109 @@ export default function SalesInfoComponent({
         </CardContent>
       </Card>
 
-      {/* Payment Proofs */}
+      {/* Blofin Investment Management */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center">
-              <FileImage className="mr-2 h-5 w-5" />
-              Comprobantes de Pago ({sale.paymentProofs.length})
+              <DollarSign className="mr-2 h-5 w-5 text-green-600" />
+              Gestión de Inversión Blofin
             </div>
-            {canEditPayments() && (
+            {canManageStudent() && (
               <Dialog
-                open={showPaymentModal}
-                onOpenChange={setShowPaymentModal}
+                open={showInvestmentModal}
+                onOpenChange={setShowInvestmentModal}
               >
                 <DialogTrigger asChild>
                   <Button size="sm">
                     <Upload className="mr-2 h-4 w-4" />
-                    Agregar Comprobante
+                    Actualizar Inversión
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Agregar Comprobante de Pago</DialogTitle>
+                    <DialogTitle>Actualizar Inversión Blofin</DialogTitle>
                     <DialogDescription>
-                      Registra un nuevo pago para {lead.name}
+                      Registra o actualiza la inversión de {lead.name} en Blofin
                     </DialogDescription>
                   </DialogHeader>
 
-                  <form onSubmit={handleAddPaymentProof} className="space-y-4">
-                    <div>
-                      <Label htmlFor="amount">Monto del Pago</Label>
-                      <Input
-                        id="amount"
-                        type="number"
-                        step="0.01"
-                        value={paymentForm.amount}
-                        onChange={(e) =>
-                          setPaymentForm({
-                            ...paymentForm,
-                            amount: e.target.value,
-                          })
-                        }
-                        placeholder="0.00"
-                        required
-                        disabled={uploadingPayment}
-                      />
+                  {error && (
+                    <div className="bg-red-100 text-red-700 p-3 rounded-md flex items-center text-sm">
+                      <AlertCircle className="mr-2 h-4 w-4" />
+                      {error}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleUpdateInvestment} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="amount">Monto</Label>
+                        <Input
+                          id="amount"
+                          type="number"
+                          step="0.01"
+                          value={investmentForm.amount}
+                          onChange={(e) =>
+                            setInvestmentForm({
+                              ...investmentForm,
+                              amount: e.target.value,
+                            })
+                          }
+                          placeholder="0.00"
+                          required
+                          disabled={updating}
+                        />
+                      </div>
+
+                      <div>
+                        <Label htmlFor="currency">Moneda</Label>
+                        <Select
+                          value={investmentForm.currency}
+                          onValueChange={(value: "USD" | "PEN") =>
+                            setInvestmentForm({
+                              ...investmentForm,
+                              currency: value,
+                            })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="USD">USD (Mín: $30)</SelectItem>
+                            <SelectItem value="PEN">
+                              PEN (Mín: S/100)
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
 
-                    <div>
-                      <Label htmlFor="paymentProof">Comprobante de Pago</Label>
-                      <FileUpload
-                        onFileSelected={(file) => {
-                          setSelectedFile(file);
-                          setUploadError(null);
-                        }}
-                        onFileRemoved={() => {
-                          setSelectedFile(null);
-                          setUploadError(null);
-                        }}
-                        isUploading={uploadingFile}
-                        uploadProgress={uploadProgress}
-                        disabled={uploadingPayment}
-                        maxSize={5}
-                        placeholder="Selecciona el comprobante de pago"
-                        error={uploadError || undefined}
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="description">
-                        Descripción (opcional)
-                      </Label>
-                      <Textarea
-                        id="description"
-                        value={paymentForm.description}
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="completed"
+                        checked={investmentForm.completed}
                         onChange={(e) =>
-                          setPaymentForm({
-                            ...paymentForm,
-                            description: e.target.value,
+                          setInvestmentForm({
+                            ...investmentForm,
+                            completed: e.target.checked,
                           })
                         }
-                        placeholder="Detalles del pago..."
-                        rows={3}
-                        disabled={uploadingPayment}
+                        disabled={updating}
                       />
+                      <Label htmlFor="completed">Marcar como completada</Label>
+                    </div>
+
+                    <div className="text-sm text-gray-600 bg-blue-50 p-3 rounded-md">
+                      <p className="font-medium">Requisitos mínimos:</p>
+                      <p>• USD: $30 mínimo</p>
+                      <p>• PEN: S/100 mínimo</p>
+                      <p>
+                        • Al completar la inversión mínima, se otorgará acceso
+                        automáticamente
+                      </p>
                     </div>
 
                     <DialogFooter>
@@ -531,27 +557,23 @@ export default function SalesInfoComponent({
                         type="button"
                         variant="outline"
                         onClick={() => {
-                          setShowPaymentModal(false);
-                          setPaymentForm({ amount: "", description: "" });
-                          setSelectedFile(null);
-                          setUploadProgress(0);
-                          setUploadError(null);
+                          setShowInvestmentModal(false);
+                          setInvestmentForm({
+                            amount: "",
+                            currency: "USD",
+                            completed: false,
+                          });
+                          setError(null);
                         }}
-                        disabled={uploadingPayment}
+                        disabled={updating}
                       >
                         Cancelar
                       </Button>
                       <Button
                         type="submit"
-                        disabled={
-                          uploadingPayment ||
-                          !selectedFile ||
-                          !paymentForm.amount
-                        }
+                        disabled={updating || !investmentForm.amount}
                       >
-                        {uploadingPayment
-                          ? "Guardando..."
-                          : "Guardar Comprobante"}
+                        {updating ? "Actualizando..." : "Actualizar Inversión"}
                       </Button>
                     </DialogFooter>
                   </form>
@@ -561,56 +583,274 @@ export default function SalesInfoComponent({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {sale.paymentProofs.length === 0 ? (
+          {!lead.blofinInvestmentCompleted ? (
             <div className="text-center py-6 text-gray-500">
-              <FileImage className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-              <p>No hay comprobantes de pago registrados.</p>
+              <DollarSign className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+              <p>
+                {lead.blofinAccountCreated
+                  ? "Cuenta creada - Esperando inversión mínima"
+                  : "No ha creado cuenta en Blofin"}
+              </p>
+              <p className="text-sm mt-1">
+                Mínimo requerido: $30 USD o S/100 PEN
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
-              {sale.paymentProofs.map((proof, index) => (
-                <div
-                  key={proof.id}
-                  className="flex items-center justify-between p-4 border rounded-lg"
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                      <DollarSign className="h-5 w-5 text-green-600" />
-                    </div>
-                    <div>
-                      <div className="font-medium">
-                        ${proof.amount.toLocaleString()}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {formatDate(proof.uploadedAt)}
-                      </div>
-                      {proof.description && (
-                        <div className="text-sm text-gray-600 mt-1">
-                          {proof.description}
-                        </div>
-                      )}
-                    </div>
+              <div className="p-4 border rounded-lg bg-green-50">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
                   </div>
-                  <div className="flex items-center space-x-2">
-                    {proof.imageUrl && (
-                      <Button size="sm" variant="outline" asChild>
-                        <a
-                          href={proof.imageUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          Ver Imagen
-                        </a>
-                      </Button>
+                  <div>
+                    <div className="font-medium text-green-800">
+                      Inversión Completada
+                    </div>
+                    <div className="text-sm text-green-700">
+                      {lead.blofinInvestmentAmount}{" "}
+                      {lead.blofinInvestmentCurrency}
+                    </div>
+                    {lead.blofinProofUploaded && (
+                      <div className="text-xs text-green-600 mt-1">
+                        ✅ Comprobante verificado
+                      </div>
                     )}
                   </div>
                 </div>
-              ))}
+              </div>
             </div>
           )}
         </CardContent>
       </Card>
+
+      {/* Community Access Management */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Users className="mr-2 h-5 w-5 text-purple-600" />
+              Acceso a Comunidades
+            </div>
+            {canManageStudent() && (
+              <Dialog
+                open={showCommunityModal}
+                onOpenChange={setShowCommunityModal}
+              >
+                <DialogTrigger asChild>
+                  <Button size="sm" variant="outline">
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    Gestionar Acceso
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Gestionar Acceso a Comunidades</DialogTitle>
+                    <DialogDescription>
+                      Otorgar o revocar acceso a las comunidades de {lead.name}
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  {error && (
+                    <div className="bg-red-100 text-red-700 p-3 rounded-md flex items-center text-sm">
+                      <AlertCircle className="mr-2 h-4 w-4" />
+                      {error}
+                    </div>
+                  )}
+
+                  <form
+                    onSubmit={handleUpdateCommunityAccess}
+                    className="space-y-4"
+                  >
+                    <div>
+                      <Label htmlFor="communityType">Tipo de Comunidad</Label>
+                      <Select
+                        value={communityForm.type}
+                        onValueChange={(
+                          value: "discord" | "telegram" | "whatsapp"
+                        ) =>
+                          setCommunityForm({
+                            ...communityForm,
+                            type: value,
+                          })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="discord">Discord</SelectItem>
+                          <SelectItem value="telegram">Telegram</SelectItem>
+                          <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="accessType">Acción</Label>
+                      <Select
+                        value={communityForm.granted ? "grant" : "revoke"}
+                        onValueChange={(value) =>
+                          setCommunityForm({
+                            ...communityForm,
+                            granted: value === "grant",
+                          })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="grant">Otorgar Acceso</SelectItem>
+                          <SelectItem value="revoke">Revocar Acceso</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <DialogFooter>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setShowCommunityModal(false);
+                          setError(null);
+                        }}
+                        disabled={updating}
+                      >
+                        Cancelar
+                      </Button>
+                      <Button type="submit" disabled={updating}>
+                        {updating ? "Actualizando..." : "Actualizar Acceso"}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-4 border rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <MessageSquare className="h-4 w-4 text-purple-600" />
+                  <span className="font-medium">Discord</span>
+                </div>
+                {lead.communityAccess?.discord ? (
+                  <Badge className="bg-green-100 text-green-800">Activo</Badge>
+                ) : (
+                  <Badge variant="outline" className="text-gray-500">
+                    Inactivo
+                  </Badge>
+                )}
+              </div>
+              <p className="text-sm text-gray-600">
+                Comunidad principal de estudiantes
+              </p>
+            </div>
+
+            <div className="p-4 border rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <MessageSquare className="h-4 w-4 text-blue-600" />
+                  <span className="font-medium">Telegram</span>
+                </div>
+                {lead.communityAccess?.telegram ? (
+                  <Badge className="bg-green-100 text-green-800">Activo</Badge>
+                ) : (
+                  <Badge variant="outline" className="text-gray-500">
+                    Inactivo
+                  </Badge>
+                )}
+              </div>
+              <p className="text-sm text-gray-600">
+                Grupo de avisos y notificaciones
+              </p>
+            </div>
+
+            <div className="p-4 border rounded-lg">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <MessageSquare className="h-4 w-4 text-green-600" />
+                  <span className="font-medium">WhatsApp</span>
+                </div>
+                {lead.communityAccess?.whatsapp ? (
+                  <Badge className="bg-green-100 text-green-800">Activo</Badge>
+                ) : (
+                  <Badge variant="outline" className="text-gray-500">
+                    Inactivo
+                  </Badge>
+                )}
+              </div>
+              <p className="text-sm text-gray-600">
+                Soporte directo y consultas
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Course Access Management */}
+      {lead.accessGranted && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <PlayCircle className="h-5 w-5 text-green-600" />
+              Acceso al Curso
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-green-50 p-4 rounded-lg">
+                <div className="text-sm text-green-600 mb-1">
+                  Estado de Acceso
+                </div>
+                <div className="font-medium text-green-800">
+                  {getAccessStatus() === "active"
+                    ? "Acceso Activo"
+                    : getAccessStatus() === "expired"
+                    ? "Acceso Expirado"
+                    : "Acceso Otorgado"}
+                </div>
+                <div className="text-sm text-green-700 mt-1">
+                  Desde: {formatDate(lead.accessStartDate)}
+                </div>
+                {lead.accessEndDate && (
+                  <div className="text-sm text-green-700">
+                    Hasta: {formatDate(lead.accessEndDate)}
+                  </div>
+                )}
+                {getRemainingDays() !== null &&
+                  getAccessStatus() === "active" && (
+                    <div className="text-sm font-medium text-green-800 mt-2">
+                      Faltan {getRemainingDays()} días
+                    </div>
+                  )}
+              </div>
+
+              <div className="space-y-2">
+                <div className="text-sm text-gray-500">
+                  Contenido Disponible
+                </div>
+                <div className="space-y-1">
+                  <div className="flex items-center text-sm">
+                    <BookOpen className="h-3 w-3 mr-2 text-blue-500" />
+                    <span>8 Cursos completos</span>
+                  </div>
+                  <div className="flex items-center text-sm">
+                    <PlayCircle className="h-3 w-3 mr-2 text-blue-500" />
+                    <span>150+ Lecciones en video</span>
+                  </div>
+                  <div className="flex items-center text-sm">
+                    <Users className="h-3 w-3 mr-2 text-blue-500" />
+                    <span>Acceso a comunidades</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Quick Actions */}
       {hasPermission("active_members:read") && (
@@ -622,12 +862,12 @@ export default function SalesInfoComponent({
                 <div>
                   <div className="font-medium">Gestión de Miembros Activos</div>
                   <div className="text-sm text-gray-500">
-                    Ver y gestionar el acceso al curso
+                    Ver y gestionar todos los estudiantes activos
                   </div>
                 </div>
               </div>
               <Button variant="outline" asChild>
-                <a href="/admin/activos">Ver en Activos</a>
+                <a href="/admin/activos">Ver Todos los Activos</a>
               </Button>
             </div>
           </CardContent>

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Lead } from "@/lib/firebase/db";
-import { getSaleByLeadId } from "@/lib/firebase/sales";
 import { getUserProfile } from "@/lib/firebase/rbac";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +12,10 @@ import {
   CheckCircle,
   XCircle,
   RefreshCw,
+  UserCheck,
+  UserX,
+  UserPlus,
+  AlertCircle,
 } from "lucide-react";
 
 interface LeadHistoryProps {
@@ -27,12 +30,6 @@ interface HistoryEntryWithUser {
   performedBy: string;
   performedAt: Date;
   userName?: string;
-  saleInfo?: {
-    saleUserId: string;
-    saleUserName?: string;
-    totalAmount: number;
-    paymentPlan: string;
-  };
 }
 
 export default function LeadHistoryComponent({ lead }: LeadHistoryProps) {
@@ -58,7 +55,6 @@ export default function LeadHistoryComponent({ lead }: LeadHistoryProps) {
 
       for (const entry of history) {
         let userName = "Usuario Desconocido";
-        let saleInfo = undefined;
 
         // Get user name for performedBy
         try {
@@ -71,37 +67,6 @@ export default function LeadHistoryComponent({ lead }: LeadHistoryProps) {
           console.warn(`Could not load user ${entry.performedBy}:`, err);
         }
 
-        // If this is a sale transition, get sale information
-        if (entry.newStatus === "sale" && lead.saleId) {
-          try {
-            const sale = await getSaleByLeadId(lead.id!);
-            if (sale) {
-              let saleUserName = "Usuario Desconocido";
-              try {
-                const saleUserProfile = await getUserProfile(sale.saleUserId);
-                saleUserName =
-                  saleUserProfile?.displayName ||
-                  saleUserProfile?.email ||
-                  "Usuario Desconocido";
-              } catch (err) {
-                console.warn(
-                  `Could not load sale user ${sale.saleUserId}:`,
-                  err
-                );
-              }
-
-              saleInfo = {
-                saleUserId: sale.saleUserId,
-                saleUserName,
-                totalAmount: sale.totalAmount,
-                paymentPlan: sale.paymentPlan,
-              };
-            }
-          } catch (err) {
-            console.warn("Could not load sale info:", err);
-          }
-        }
-
         enrichedHistory.push({
           ...entry,
           performedAt:
@@ -112,7 +77,6 @@ export default function LeadHistoryComponent({ lead }: LeadHistoryProps) {
               ? entry.performedAt.toDate()
               : new Date(entry.performedAt),
           userName,
-          saleInfo,
         });
       }
 
@@ -131,14 +95,14 @@ export default function LeadHistoryComponent({ lead }: LeadHistoryProps) {
 
   const getStatusIcon = (status: Lead["status"]) => {
     switch (status) {
-      case "lead":
-        return <User className="h-4 w-4 text-blue-500" />;
-      case "onboarding":
+      case "student_pending":
+        return <UserPlus className="h-4 w-4 text-blue-500" />;
+      case "student_active":
+        return <UserCheck className="h-4 w-4 text-green-500" />;
+      case "student_inactive":
         return <Clock className="h-4 w-4 text-amber-500" />;
-      case "sale":
-        return <DollarSign className="h-4 w-4 text-green-500" />;
       case "rejected":
-        return <XCircle className="h-4 w-4 text-red-500" />;
+        return <UserX className="h-4 w-4 text-red-500" />;
       default:
         return <RefreshCw className="h-4 w-4 text-gray-500" />;
     }
@@ -146,12 +110,12 @@ export default function LeadHistoryComponent({ lead }: LeadHistoryProps) {
 
   const getStatusLabel = (status: Lead["status"]) => {
     switch (status) {
-      case "lead":
-        return "Nuevo Lead";
-      case "onboarding":
-        return "En Onboarding";
-      case "sale":
-        return "Venta";
+      case "student_pending":
+        return "Estudiante Pendiente";
+      case "student_active":
+        return "Estudiante Activo";
+      case "student_inactive":
+        return "Estudiante Inactivo";
       case "rejected":
         return "Rechazado";
       default:
@@ -161,17 +125,40 @@ export default function LeadHistoryComponent({ lead }: LeadHistoryProps) {
 
   const getStatusColor = (status: Lead["status"]) => {
     switch (status) {
-      case "lead":
+      case "student_pending":
         return "bg-blue-100 text-blue-800";
-      case "onboarding":
-        return "bg-amber-100 text-amber-800";
-      case "sale":
+      case "student_active":
         return "bg-green-100 text-green-800";
+      case "student_inactive":
+        return "bg-amber-100 text-amber-800";
       case "rejected":
         return "bg-red-100 text-red-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
+  };
+
+  const getActionIcon = (details: string) => {
+    const lowerDetails = details.toLowerCase();
+
+    if (lowerDetails.includes("inversión") || lowerDetails.includes("blofin")) {
+      return <DollarSign className="h-4 w-4 text-green-600" />;
+    }
+    if (lowerDetails.includes("acceso") && lowerDetails.includes("granted")) {
+      return <CheckCircle className="h-4 w-4 text-green-600" />;
+    }
+    if (lowerDetails.includes("acceso") && lowerDetails.includes("revoked")) {
+      return <XCircle className="h-4 w-4 text-red-600" />;
+    }
+    if (
+      lowerDetails.includes("comunidad") ||
+      lowerDetails.includes("discord") ||
+      lowerDetails.includes("telegram")
+    ) {
+      return <User className="h-4 w-4 text-purple-600" />;
+    }
+
+    return <RefreshCw className="h-4 w-4 text-gray-500" />;
   };
 
   const formatDate = (date: Date): string => {
@@ -203,7 +190,7 @@ export default function LeadHistoryComponent({ lead }: LeadHistoryProps) {
         <CardHeader>
           <CardTitle className="flex items-center">
             <History className="mr-2 h-5 w-5" />
-            Historial del Lead
+            Historial del Estudiante
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -221,7 +208,7 @@ export default function LeadHistoryComponent({ lead }: LeadHistoryProps) {
       <CardHeader>
         <CardTitle className="flex items-center">
           <History className="mr-2 h-5 w-5" />
-          Historial del Lead ({historyWithUsers.length})
+          Historial del Estudiante ({historyWithUsers.length})
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -252,7 +239,12 @@ export default function LeadHistoryComponent({ lead }: LeadHistoryProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-sm text-gray-900">{entry.details}</p>
+                  <div className="flex items-start space-x-2">
+                    {getActionIcon(entry.details)}
+                    <p className="text-sm text-gray-900 flex-1">
+                      {entry.details}
+                    </p>
+                  </div>
 
                   <div className="flex items-center text-xs text-gray-600 space-x-4">
                     <div className="flex items-center">
@@ -265,36 +257,40 @@ export default function LeadHistoryComponent({ lead }: LeadHistoryProps) {
                     </div>
                   </div>
 
-                  {/* Sale Information */}
-                  {entry.saleInfo && (
+                  {/* Investment Information - Parse from details if available */}
+                  {entry.details.toLowerCase().includes("inversión") && (
                     <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-md">
-                      <div className="flex items-center space-x-2 mb-2">
+                      <div className="flex items-center space-x-2 mb-1">
                         <DollarSign className="h-4 w-4 text-green-600" />
                         <span className="text-sm font-medium text-green-800">
-                          Información de Venta
+                          Información de Inversión
                         </span>
                       </div>
-                      <div className="space-y-1 text-xs text-green-700">
-                        <div>
-                          Vendido por:{" "}
-                          <span className="font-medium">
-                            {entry.saleInfo.saleUserName}
-                          </span>
-                        </div>
-                        <div>
-                          Monto:{" "}
-                          <span className="font-medium">
-                            ${entry.saleInfo.totalAmount.toLocaleString()}
-                          </span>
-                        </div>
-                        <div>
-                          Plan:{" "}
-                          <span className="font-medium">
-                            {entry.saleInfo.paymentPlan
-                              .replace("_", " ")
-                              .toUpperCase()}
-                          </span>
-                        </div>
+                      <div className="text-xs text-green-700">
+                        <div>{entry.details}</div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Special indicators for important events */}
+                  {entry.details.toLowerCase().includes("acceso granted") && (
+                    <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-blue-600" />
+                        <span className="text-xs font-medium text-blue-800">
+                          Acceso al curso otorgado
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {entry.details.toLowerCase().includes("comunidad") && (
+                    <div className="mt-2 p-2 bg-purple-50 border border-purple-200 rounded-md">
+                      <div className="flex items-center space-x-2">
+                        <User className="h-4 w-4 text-purple-600" />
+                        <span className="text-xs font-medium text-purple-800">
+                          Cambio en acceso a comunidad
+                        </span>
                       </div>
                     </div>
                   )}
