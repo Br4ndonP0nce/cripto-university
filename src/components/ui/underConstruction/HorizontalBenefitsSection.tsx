@@ -21,6 +21,7 @@ import {
 import Link from "next/link";
 import ShinyText from "@/components/animated/shinytext";
 import StarBorder from "@/components/animated/starBorder";
+
 interface Benefit {
   id: number;
   icon: React.ComponentType<{ className?: string }>;
@@ -83,7 +84,7 @@ const benefits: Benefit[] = [
     bgColor: "bg-green-900/20",
   },
   {
-    id: 5,
+    id: 6,
     icon: TrendingUp,
     title: "Grupo de ayuda y soporte continuo",
     description:
@@ -102,14 +103,8 @@ const BenefitCard = ({ benefit }: { benefit: Benefit }) => {
       transition={{ duration: 0.6 }}
       className="relative"
     >
-      {/* Background gradient for the entire card area */}
-
       <div className="relative z-10 py-8">
-        {/* Content */}
         <div className="space-y-6">
-          {/* Icon Container */}
-
-          {/* Number Badge */}
           <div className="flex items-center space-x-4">
             <div className="w-10 h-10 lg:w-12 lg:h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20">
               <span className="text-sm lg:text-lg font-bold text-white">
@@ -119,12 +114,10 @@ const BenefitCard = ({ benefit }: { benefit: Benefit }) => {
             <div className="h-px bg-gradient-to-r from-white/30 to-transparent flex-1" />
           </div>
 
-          {/* Description */}
           <p className="text-base lg:text-lg text-gray-300 leading-relaxed font-light">
             {benefit.description}
           </p>
 
-          {/* CTA or additional info could go here */}
           <Link href="/join" className="">
             <div className="flex items-center space-x-2 text-sm text-gray-400 hover:scale-102 hover:text-white/90 duration-300 font-electrolize">
               <div className="w-2 h-2 rounded-full bg-white/60" />
@@ -162,20 +155,54 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
       className="w-full bg-black relative overflow-hidden"
       ref={containerRef}
     >
-      {/* Dark Dotted Grid Background - matching hero */}
+      {/* Updated background for #141b33 */}
       <div
         className="absolute inset-0 z-0"
         style={{
-          background: "#000000",
+          background: "#141b33",
           backgroundImage: `
-            radial-gradient(circle, rgba(255, 255, 255, 0.2) 1.5px, transparent 1.5px)
+            radial-gradient(circle, rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px)
           `,
           backgroundSize: "30px 30px",
           backgroundPosition: "0 0",
         }}
       />
 
-      {/* Gradient Overlay */}
+      {/* Enhanced Visible Gradient Overlays for #141b33 Background */}
+      {/* Focused top darkening - radial from top center to avoid corner darkening */}
+      <div className="absolute inset-0 z-5 bg-gradient-to-b from-black/60 from-0% via-black/20 via-30% to-transparent to-60%" />
+
+      {/* Additional top center focus - radial gradient */}
+      <div
+        className="absolute top-0 left-1/2 transform -translate-x-1/2 w-full h-96 z-10 bg-gradient-radial from-black/40 via-black/10 to-transparent opacity-80"
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 100% at center top, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 40%, transparent 70%)",
+        }}
+      />
+
+      {/* Strong bottom darkening overlay - MIRRORED */}
+      <div className="absolute inset-0 z-5 bg-gradient-to-b from-transparent via-transparent to-black/60" />
+
+      {/* Primary blue-amber accent gradient - more visible */}
+      <div className="absolute inset-0 z-10 bg-gradient-to-br from-blue-500/15 via-transparent to-amber-500/15" />
+
+      {/* Side darkening for containment */}
+      <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/30 via-transparent to-black/30" />
+
+      {/* Additional depth layers */}
+
+      {/* Enhanced Ambient Light Effects - More visible on #141b33 */}
+      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse opacity-70" />
+      <div
+        className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-500/20 rounded-full blur-3xl animate-pulse opacity-70"
+        style={{ animationDelay: "3s" }}
+      />
+
+      {/* Central ambient glow - more prominent */}
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-blue-500/8 to-amber-500/8 rounded-full blur-3xl opacity-60" />
+
+      {/* Additional corner darkening for dramatic effect */}
 
       <div className="relative z-20 max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
         <motion.div
@@ -185,10 +212,7 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
           className="text-center lg:text-left space-y-4 mb-16"
         >
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-oxanium font-bold text-brand-amber leading-tight">
-            Beneficios{" "}
-            <span className="bg-gradient-to-r from-slate-300 to-slate-500 bg-clip-text text-transparent">
-              Únicos
-            </span>
+            Beneficios <span className="text-white bg-clip-text ">Únicos</span>
           </h2>
           <p className="text-lg text-gray-300 font-electrolize font-light max-w-2xl mx-auto lg:mx-0">
             Descubre las ventajas que solo CriptoUniversity puede ofrecerte en
@@ -199,7 +223,7 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
 
       <div ref={ref} className="relative max-w-7xl mx-auto pb-20">
         {data.map((item, index) => (
-          <div key={index} className="flex justify-start pt-10  md:gap-10">
+          <div key={index} className="flex justify-start pt-10 md:gap-10">
             <div className="sticky flex flex-col md:flex-row z-40 items-center top-40 self-start max-w-xs lg:max-w-sm md:w-full">
               {/* Timeline dot with icon */}
               <div className="h-12 w-12 lg:h-14 lg:w-14 absolute left-3 md:left-3 rounded-full bg-black border-2 border-white/20 flex items-center justify-center backdrop-blur-sm">
@@ -209,8 +233,8 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
               </div>
 
               {/* Title for larger screens */}
-              <div className="hidden md:block text-3xl  md:pl-20 font-oxanium font-bold">
-                <ShinyText text={item.title} speed={8} className="text-white" />
+              <div className="hidden md:block text-3xl md:pl-20 font-oxanium font-bold">
+                <ShinyText text={item.title} speed={5} className="text-white" />
               </div>
             </div>
 
@@ -244,11 +268,6 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
 
         {/* CTA Section - Connected to timeline */}
         <div className="relative w-full flex justify-center pt-20 pb-10">
-          {/* Timeline connection line extending to CTA */}
-
-          {/* Horizontal connection line from timeline to center */}
-
-          {/* CTA Container - Centered */}
           <motion.div
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -256,12 +275,10 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="relative z-20 flex flex-col items-center"
           >
-            {/* Glowing dot at center connection */}
-
             {/* CTA Button */}
             <Link href="/join" className="block">
               <StarBorder
-                as="div" // Changed from button to div
+                as="div"
                 className="custom-class"
                 color="gold"
                 speed="5s"
@@ -304,7 +321,7 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="text-center text-gray-400 text-xs md:sm mt-4 font-light "
+              className="text-center text-gray-400 text-xs md:sm mt-4 font-light"
             >
               Sin tarjeta de crédito • Acceso inmediato • Comunidad exclusiva
             </motion.p>
