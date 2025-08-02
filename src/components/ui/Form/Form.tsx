@@ -2,13 +2,17 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, ChevronLeft, ChevronDown } from "lucide-react";
+import {
+  ChevronRight,
+  ChevronLeft,
+  ChevronDown,
+  ExternalLink,
+} from "lucide-react";
 import { addLead } from "@/lib/firebase/db";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 
 import {
   validateEmail,
@@ -16,15 +20,15 @@ import {
   validatePhone,
   generateWhatsAppLink,
   COUNTRY_VALIDATIONS,
-  PhoneValidationResult,
 } from "@/lib/utils/phonevalidationutils";
 
 // Question types
-type QuestionType = "text" | "email" | "phone" | "select" | "textarea";
+type QuestionType = "text" | "email" | "phone" | "select";
 
 interface Option {
   id: string;
   text: string;
+  flag?: string;
 }
 
 interface Question {
@@ -36,130 +40,66 @@ interface Question {
   options?: Option[];
 }
 
-// Updated questions focused on business qualification
+// Updated questions for CriptoUniversity registration
 const questions: Question[] = [
   {
     id: "name",
     text: "¿Cuál es tu nombre?",
     type: "text",
     required: true,
+    description:
+      "Necesitamos tu nombre para personalizar tu experiencia de aprendizaje.",
   },
   {
     id: "email",
     text: "¿Cuál es tu mejor correo?",
     type: "email",
     required: true,
-    description: "Para enviarte acceso y actualizaciones del sistema.",
+    description:
+      "Para enviarte acceso a los cursos y actualizaciones importantes.",
   },
   {
     id: "phone",
     text: "¿Cuál es tu número de WhatsApp?",
     type: "phone",
     required: true,
-    description: "Para contactarte de forma personalizada.",
+    description: "Para contactarte y agregarte a la comunidad privada.",
   },
   {
-    id: "business",
-    text: "¿De qué va tu negocio?",
+    id: "country",
+    text: "¿De qué país eres?",
     type: "select",
     required: true,
+    description: "Para personalizar el contenido según tu región.",
     options: [
-      {
-        id: "agency",
-        text: "Agencia de marketing digital / publicidad",
-      },
-      {
-        id: "ecommerce",
-        text: "E-commerce / Tienda online",
-      },
-      {
-        id: "saas",
-        text: "Software / SaaS / Tecnología",
-      },
-      {
-        id: "consulting",
-        text: "Consultoría / Servicios profesionales",
-      },
-      {
-        id: "real_estate",
-        text: "Bienes raíces / Inmobiliaria",
-      },
-      {
-        id: "education",
-        text: "Educación / Cursos online",
-      },
-      {
-        id: "health",
-        text: "Salud / Medicina / Wellness",
-      },
-      {
-        id: "restaurant",
-        text: "Restaurante / Comida",
-      },
-      {
-        id: "retail",
-        text: "Retail / Tienda física",
-      },
-      {
-        id: "freelancer",
-        text: "Freelancer / Profesional independiente",
-      },
-      {
-        id: "startup",
-        text: "Startup / Emprendimiento nuevo",
-      },
-      {
-        id: "other",
-        text: "Otro tipo de negocio",
-      },
+      { id: "mx", text: "México", flag: "🇲🇽" },
+      { id: "ar", text: "Argentina", flag: "🇦🇷" },
+      { id: "pe", text: "Perú", flag: "🇵🇪" },
+      { id: "co", text: "Colombia", flag: "🇨🇴" },
+      { id: "cl", text: "Chile", flag: "🇨🇱" },
+      { id: "br", text: "Brasil", flag: "🇧🇷" },
+      { id: "ec", text: "Ecuador", flag: "🇪🇨" },
+      { id: "ve", text: "Venezuela", flag: "🇻🇪" },
+      { id: "uy", text: "Uruguay", flag: "🇺🇾" },
+      { id: "py", text: "Paraguay", flag: "🇵🇾" },
+      { id: "bo", text: "Bolivia", flag: "🇧🇴" },
+      { id: "cr", text: "Costa Rica", flag: "🇨🇷" },
+      { id: "pa", text: "Panamá", flag: "🇵🇦" },
+      { id: "gt", text: "Guatemala", flag: "🇬🇹" },
+      { id: "sv", text: "El Salvador", flag: "🇸🇻" },
+      { id: "hn", text: "Honduras", flag: "🇭🇳" },
+      { id: "ni", text: "Nicaragua", flag: "🇳🇮" },
+      { id: "do", text: "República Dominicana", flag: "🇩🇴" },
+      { id: "cu", text: "Cuba", flag: "🇨🇺" },
+      { id: "us", text: "Estados Unidos", flag: "🇺🇸" },
+      { id: "ca", text: "Canadá", flag: "🇨🇦" },
+      { id: "es", text: "España", flag: "🇪🇸" },
+      { id: "other", text: "Otro país", flag: "🌍" },
     ],
-  },
-  {
-    id: "investment",
-    text: "¿Cómo te suena tener acceso de por vida a la cantidad de forms que necesites y todo el sistema por $200 USD?",
-    type: "select",
-    required: true,
-    description: "Acceso completo y permanente a nuestra plataforma.",
-    options: [
-      {
-        id: "yes",
-        text: "¡Claro! Cuento con la inversión",
-      },
-      {
-        id: "maybe",
-        text: "No cuento con la inversión pero puedo conseguirla",
-      },
-      {
-        id: "no",
-        text: "Definitivamente no cuento con la inversión",
-      },
-    ],
-  },
-  {
-    id: "description",
-    text: "Platícame un poco de lo que haces",
-    type: "textarea",
-    required: true,
-    description:
-      "Cuéntanos sobre tu negocio, tus objetivos y cómo planeas usar nuestro sistema.",
   },
 ];
 
-// Guerrilla marketing messages for sonner notifications
-const guerrillaMessages = [
-  "Esta podría ser la experiencia para tus clientes y para ti... muy fácil, muy personalizable, 100% tuya",
-  "Imagina tener este nivel de personalización en todos tus formularios",
-  "Esto es solo una muestra de lo que puedes crear para tu negocio",
-  "Formularios que convierten como este, ¿te imaginas el potencial?",
-  "Cada pregunta optimizada para maximizar conversiones",
-  "Tu marca, tu estilo, tus reglas. Así de simple",
-  "Validaciones robustas, experiencia premium. Todo tuyo por $200",
-  "¿Ya te imaginas esto con los colores y logo de tu empresa?",
-  "Sistema completo, sin límites, sin mensualidades. Una sola vez",
-  "Formularios que se sienten premium, porque tu negocio lo vale",
-];
-
-// Generate country codes from COUNTRY_VALIDATIONS (same as before)
+// Generate country codes from COUNTRY_VALIDATIONS
 const countryCodes = COUNTRY_VALIDATIONS.filter((c) => c.code !== "+999")
   .sort((a, b) => {
     const latinAmericanCodes = [
@@ -216,7 +156,7 @@ const countryCodes = COUNTRY_VALIDATIONS.filter((c) => c.code !== "+999")
   .map((c) => ({ code: c.code, country: c.country }));
 
 // Main component
-const BusinessLeadForm: React.FC = () => {
+const CriptoUniversityForm: React.FC = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | null>>({});
   const [selectedCode, setSelectedCode] = useState("+52"); // Default to Mexico
@@ -228,68 +168,13 @@ const BusinessLeadForm: React.FC = () => {
     string | null
   >(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Guerrilla marketing with Sonner
-  const guerrillaTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Start guerrilla marketing notifications using Sonner
-  useEffect(() => {
-    const startGuerrillaMarketing = () => {
-      const showRandomMessage = () => {
-        if (!isSubmitted && !isSubmitting) {
-          const randomMessage =
-            guerrillaMessages[
-              Math.floor(Math.random() * guerrillaMessages.length)
-            ];
-          toast(randomMessage, {
-            duration: 4000,
-            style: {
-              background: "rgba(16, 185, 129, 0.9)",
-              color: "white",
-              border: "1px solid rgba(16, 185, 129, 0.3)",
-            },
-            className: "border-emerald-500/30",
-          });
-        }
-      };
-
-      // Show first message after 5 seconds
-      const initialTimer = setTimeout(() => {
-        showRandomMessage();
-
-        // Then show a message every 8 seconds
-        guerrillaTimeoutRef.current = setInterval(showRandomMessage, 8000);
-      }, 5000);
-
-      return () => {
-        clearTimeout(initialTimer);
-        if (guerrillaTimeoutRef.current) {
-          clearInterval(guerrillaTimeoutRef.current);
-        }
-      };
-    };
-
-    return startGuerrillaMarketing();
-  }, [isSubmitted, isSubmitting]);
-
-  // Clean up notifications on unmount
-  useEffect(() => {
-    return () => {
-      if (guerrillaTimeoutRef.current) {
-        clearInterval(guerrillaTimeoutRef.current);
-      }
-    };
-  }, []);
 
   // Focus the input field when the question changes
   useEffect(() => {
     setTimeout(() => {
       if (inputRef.current) {
         inputRef.current.focus();
-      } else if (textareaRef.current) {
-        textareaRef.current.focus();
       }
     }, 300);
   }, [currentQuestion]);
@@ -345,9 +230,7 @@ const BusinessLeadForm: React.FC = () => {
   };
 
   // Handle input change
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAnswers({
       ...answers,
       [questions[currentQuestion].id]: e.target.value,
@@ -428,11 +311,6 @@ const BusinessLeadForm: React.FC = () => {
   const handleSubmit = async () => {
     setIsSubmitting(true);
 
-    // Stop guerrilla marketing
-    if (guerrillaTimeoutRef.current) {
-      clearInterval(guerrillaTimeoutRef.current);
-    }
-
     // Validate all required fields
     for (let i = 0; i < questions.length; i++) {
       const question = questions[i];
@@ -478,39 +356,37 @@ const BusinessLeadForm: React.FC = () => {
     }
 
     try {
-      // Format the lead data for Firebase (updated fields)
+      // Format the lead data for Firebase
       const leadData = {
         name: answers.name || "",
         email: answers.email || "",
         phone: answers.phone || "",
-        role: answers.business_text || answers.business || "", // Using business instead of role
-        level: "business", // Set default since we removed level question
-        software: "system", // Set default since we removed software question
-        clients: answers.description || "", // Using description for clients field
-        investment: answers.investment_text || answers.investment || "",
-        why: answers.description || "", // Using description for why field too
-        status: "lead" as const,
+        country: answers.country_text || answers.country || "",
+        status: "student_pending" as const,
+        registrationDate: new Date().toISOString(),
+        source: "criptouniversity_form",
       };
 
       // Add to Firestore
       const leadId = await addLead(leadData);
-      console.log("Lead successfully added with ID:", leadId);
+      console.log("Student successfully registered with ID:", leadId);
 
       setIsSubmitted(true);
 
       // Success toast
-      toast.success("¡Formulario enviado exitosamente!", {
-        description: "Nos pondremos en contacto contigo pronto.",
+      toast.success("¡Registro exitoso!", {
+        description:
+          "Bienvenido a CriptoUniversity. Sigue los pasos para activar tu acceso.",
         duration: 5000,
       });
     } catch (err) {
       console.error("Error submitting form:", err);
       setError(
-        "Hubo un error al enviar el formulario. Por favor intenta de nuevo."
+        "Hubo un error al procesar tu registro. Por favor intenta de nuevo."
       );
 
       // Error toast
-      toast.error("Error al enviar el formulario", {
+      toast.error("Error en el registro", {
         description: "Por favor intenta de nuevo.",
       });
     } finally {
@@ -540,7 +416,7 @@ const BusinessLeadForm: React.FC = () => {
               value={answers[question.id] || ""}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              className="w-full bg-transparent border-0 border-b-2 border-emerald-500/30 focus:border-emerald-400 py-3 px-1 text-lg text-white transition-colors placeholder:text-gray-400 rounded-none focus-visible:ring-0"
+              className="w-full bg-transparent border-0 border-b-2 border-brand-amber/30 focus:border-brand-amber py-3 px-1 text-lg text-white transition-colors placeholder:text-gray-400 rounded-none focus-visible:ring-0"
               placeholder={
                 question.id === "name"
                   ? "Tu nombre completo"
@@ -629,10 +505,10 @@ const BusinessLeadForm: React.FC = () => {
               onKeyDown={handleKeyDown}
               className={`w-full bg-transparent border-0 border-b-2 ${
                 emailValidation.state === "valid"
-                  ? "border-emerald-400 focus:border-emerald-300"
+                  ? "border-brand-amber focus:border-brand-amber/80"
                   : emailValidation.state === "invalid"
                   ? "border-red-400 focus:border-red-300"
-                  : "border-emerald-500/30 focus:border-emerald-400"
+                  : "border-brand-amber/30 focus:border-brand-amber"
               } py-3 px-1 text-lg text-white transition-colors placeholder:text-gray-400 rounded-none focus-visible:ring-0`}
               placeholder="ejemplo@correo.com"
             />
@@ -640,7 +516,7 @@ const BusinessLeadForm: React.FC = () => {
             {emailValue && (
               <div className="mt-2 text-xs">
                 {emailValidation.state === "valid" && (
-                  <span className="text-emerald-400 flex items-center gap-1">
+                  <span className="text-brand-amber flex items-center gap-1">
                     <span>✅</span> {emailValidation.message}
                   </span>
                 )}
@@ -681,20 +557,20 @@ const BusinessLeadForm: React.FC = () => {
                   type="button"
                   variant="outline"
                   onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-                  className="flex items-center bg-[#1a1a1a] border-emerald-500/30 text-white hover:bg-[#2a2a2a] min-w-[80px]"
+                  className="flex items-center bg-[#1a1a1a] border-brand-amber/30 text-white hover:bg-[#2a2a2a] min-w-[80px]"
                 >
                   {selectedCode}
                   <ChevronDown className="ml-1 w-4 h-4" />
                 </Button>
 
                 {showCountryDropdown && (
-                  <div className="absolute top-full left-0 mt-1 bg-[#1a1a1a] border border-emerald-500/30 rounded-md z-10 w-64">
+                  <div className="absolute top-full left-0 mt-1 bg-[#1a1a1a] border border-brand-amber/30 rounded-md z-10 w-64">
                     <ScrollArea className="h-60">
                       {countryCodes.map((country, index) => (
                         <button
                           key={`${country.code}-${country.country}-${index}`}
                           type="button"
-                          className="block w-full text-left px-3 py-2 hover:bg-emerald-500/20 text-white text-sm"
+                          className="block w-full text-left px-3 py-2 hover:bg-brand-amber/20 text-white text-sm"
                           onClick={() => {
                             setSelectedCode(country.code);
                             setShowCountryDropdown(false);
@@ -723,7 +599,7 @@ const BusinessLeadForm: React.FC = () => {
                 value={nationalNumber}
                 onChange={handlePhoneChange}
                 onKeyDown={handleKeyDown}
-                className="flex-1 bg-transparent border-0 border-b-2 border-emerald-500/30 focus:border-emerald-400 py-3 px-1 text-lg text-white rounded-none focus-visible:ring-0 placeholder:text-gray-400"
+                className="flex-1 bg-transparent border-0 border-b-2 border-brand-amber/30 focus:border-brand-amber py-3 px-1 text-lg text-white rounded-none focus-visible:ring-0 placeholder:text-gray-400"
                 placeholder={currentCountryValidation?.example || "1234567890"}
                 maxLength={currentCountryValidation?.maxLength || 15}
               />
@@ -731,8 +607,8 @@ const BusinessLeadForm: React.FC = () => {
 
             <div className="flex items-center justify-between mt-2">
               <div className="text-xs text-gray-400">
-                <span className="text-orange-500 underline">
-                  Asegurate de usar tu numero de whatsapp!
+                <span className="text-brand-amber underline">
+                  ¡Asegúrate de usar tu número de WhatsApp!
                 </span>
                 <br />
                 {currentCountryValidation && (
@@ -742,7 +618,7 @@ const BusinessLeadForm: React.FC = () => {
                     nationalNumber.length <=
                       currentCountryValidation.maxLength &&
                     !phoneValidationError ? (
-                      <span className="text-emerald-400">✅ Número válido</span>
+                      <span className="text-brand-amber">✅ Número válido</span>
                     ) : nationalNumber.length > 0 ? (
                       <span>
                         {nationalNumber.length}/
@@ -781,44 +657,10 @@ const BusinessLeadForm: React.FC = () => {
         );
 
       case "select":
-        const isBusinessQuestion = question.id === "business";
-
         return (
           <div className="w-full">
-            {isBusinessQuestion ? (
-              <ScrollArea className="h-72 w-full border border-emerald-500/30 rounded-md">
-                <div className="p-2 space-y-2">
-                  {question.options?.map((option) => (
-                    <Button
-                      key={option.id}
-                      onClick={() => handleOptionSelect(option.id, option.text)}
-                      variant="outline"
-                      className={`w-full text-left justify-start h-auto p-3 ${
-                        answers[question.id] === option.id
-                          ? "bg-emerald-500/20 border-emerald-400 text-white"
-                          : "bg-[#1a1a1a] border-emerald-500/30 text-white hover:bg-emerald-500/10"
-                      }`}
-                    >
-                      <div className="flex items-center">
-                        <div
-                          className={`flex-shrink-0 w-4 h-4 rounded-full border flex items-center justify-center mr-3 ${
-                            answers[question.id] === option.id
-                              ? "border-emerald-400 bg-emerald-400/20"
-                              : "border-emerald-500/50"
-                          }`}
-                        >
-                          {answers[question.id] === option.id && (
-                            <div className="w-2 h-2 rounded-full bg-emerald-400"></div>
-                          )}
-                        </div>
-                        <span className="text-sm">{option.text}</span>
-                      </div>
-                    </Button>
-                  ))}
-                </div>
-              </ScrollArea>
-            ) : (
-              <div className="w-full space-y-2">
+            <ScrollArea className="h-72 w-full border border-brand-amber/30 rounded-md">
+              <div className="p-2 space-y-2">
                 {question.options?.map((option) => (
                   <Button
                     key={option.id}
@@ -826,52 +668,31 @@ const BusinessLeadForm: React.FC = () => {
                     variant="outline"
                     className={`w-full text-left justify-start h-auto p-3 ${
                       answers[question.id] === option.id
-                        ? "bg-emerald-500/20 border-emerald-400 text-white"
-                        : "bg-[#1a1a1a] border-emerald-500/30 text-white hover:bg-emerald-500/10"
+                        ? "bg-brand-amber/20 border-brand-amber text-white"
+                        : "bg-[#1a1a1a] border-brand-amber/30 text-white hover:bg-brand-amber/10"
                     }`}
                   >
                     <div className="flex items-center">
                       <div
-                        className={`flex-shrink-0 w-6 h-6 rounded-full border flex items-center justify-center mr-3 ${
+                        className={`flex-shrink-0 w-4 h-4 rounded-full border flex items-center justify-center mr-3 ${
                           answers[question.id] === option.id
-                            ? "border-emerald-400 bg-emerald-400/20"
-                            : "border-emerald-500/50"
+                            ? "border-brand-amber bg-brand-amber/20"
+                            : "border-brand-amber/50"
                         }`}
                       >
                         {answers[question.id] === option.id && (
-                          <div className="w-3 h-3 rounded-full bg-emerald-400"></div>
+                          <div className="w-2 h-2 rounded-full bg-brand-amber"></div>
                         )}
                       </div>
-                      {option.text}
+                      {option.flag && (
+                        <span className="mr-2">{option.flag}</span>
+                      )}
+                      <span className="text-sm">{option.text}</span>
                     </div>
                   </Button>
                 ))}
               </div>
-            )}
-          </div>
-        );
-
-      case "textarea":
-        return (
-          <div className="w-full">
-            <Textarea
-              ref={textareaRef}
-              value={answers[question.id] || ""}
-              onChange={handleInputChange}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && e.shiftKey) return;
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleNext();
-                }
-              }}
-              rows={5}
-              className="w-full bg-transparent border-2 border-emerald-500/30 focus:border-emerald-400 text-lg text-white resize-none placeholder:text-gray-400 focus-visible:ring-0"
-              placeholder="Cuéntanos sobre tu negocio, tus objetivos y cómo planeas usar nuestro sistema..."
-            />
-            <p className="text-gray-400 text-xs mt-1">
-              Presiona Shift + Enter para hacer un salto de línea
-            </p>
+            </ScrollArea>
           </div>
         );
 
@@ -880,68 +701,146 @@ const BusinessLeadForm: React.FC = () => {
     }
   };
 
-  // If the form is submitted, show success message with WhatsApp CTA
+  // If the form is submitted, show success message with Blofin investment steps
   if (isSubmitted) {
+    const whatsappMessage = `¡Hola! Soy ${answers.name}. Acabo de registrarme en CriptoUniversity y he realizado la inversión mínima en Blofin. Adjunto mi comprobante para activar mi acceso completo a los cursos y la comunidad privada. ¡Gracias!`;
+
     return (
-      <div className="min-h-screen w-full bg-[#0f0f0f] relative text-white">
-        {/* Circuit Board - Dark Pattern */}
+      <div className="min-h-screen w-full bg-black relative text-white">
+        {/* Dark Dotted Grid Background - matching theme */}
         <div
-          className="absolute inset-0 z-0 pointer-events-none"
+          className="absolute inset-0 z-0"
           style={{
+            background: "#000000",
             backgroundImage: `
-              repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(34, 197, 94, 0.15) 19px, rgba(34, 197, 94, 0.15) 20px, transparent 20px, transparent 39px, rgba(34, 197, 94, 0.15) 39px, rgba(34, 197, 94, 0.15) 40px),
-              repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(34, 197, 94, 0.15) 19px, rgba(34, 197, 94, 0.15) 20px, transparent 20px, transparent 39px, rgba(34, 197, 94, 0.15) 39px, rgba(34, 197, 94, 0.15) 40px),
-              radial-gradient(circle at 20px 20px, rgba(16, 185, 129, 0.18) 2px, transparent 2px),
-              radial-gradient(circle at 40px 40px, rgba(16, 185, 129, 0.18) 2px, transparent 2px)
+              radial-gradient(circle, rgba(255, 255, 255, 0.2) 1.5px, transparent 1.5px)
             `,
-            backgroundSize: "40px 40px, 40px 40px, 40px 40px, 40px 40px",
+            backgroundSize: "30px 30px",
+            backgroundPosition: "0 0",
           }}
         />
 
-        <div className="relative z-10 flex justify-center items-center min-h-screen p-6">
+        {/* Gradient Overlays */}
+        <div className="absolute inset-0 z-5 bg-gradient-to-br from-blue-500/5 via-transparent to-amber-500/5" />
+        <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
+
+        <div className="relative z-20 flex justify-center items-center min-h-screen p-6">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-[#1a1a1a]/80 backdrop-blur-md rounded-xl p-8 max-w-md w-full text-center border border-emerald-500/30"
+            className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 max-w-2xl w-full text-center border border-brand-amber/30"
           >
-            <div className="text-4xl mb-4">🎉</div>
-            <h2 className="text-2xl font-bold text-white mb-3">
-              ¡Gracias por aplicar!
-            </h2>
-            <p className="text-gray-300 mb-6">
-              Hemos recibido tu solicitud. Nos pondremos en contacto contigo
-              pronto para darte acceso a nuestro sistema.
-            </p>
+            {/* Success Icon */}
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring" }}
+              className="w-16 h-16 bg-brand-amber rounded-full flex items-center justify-center mx-auto mb-6"
+            >
+              <span className="text-3xl">✅</span>
+            </motion.div>
 
-            {/* WhatsApp CTA Button */}
-            {answers.phone && (
-              <div className="mb-4">
-                <Button
-                  asChild
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
-                >
-                  <a
-                    href={generateWhatsAppLink(
-                      `Hola! soy ${answers.name}. Acabo de completar el formulario para el sistema de $200 USD y me gustaría conocer más detalles.`
-                    )}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2"
-                  >
-                    <WhatsAppIcon className="w-5 h-5" />
-                    Hablar por WhatsApp para acceso inmediato
-                  </a>
-                </Button>
-                <p className="text-gray-400 text-xs mt-2">
-                  Te llevará a WhatsApp con un mensaje pre-escrito
+            <h2 className="text-3xl font-oxanium font-bold text-white mb-4">
+              ¡Gracias por registrarte!
+            </h2>
+
+            <div className="text-left bg-blue-500/10 border border-blue-400/30 rounded-xl p-6 mb-6">
+              <h3 className="text-xl font-bold text-blue-400 mb-3 font-oxanium">
+                📈 Para activar tu acceso completo:
+              </h3>
+
+              <div className="space-y-4 text-gray-300 font-electrolize">
+                <p className="text-lg">
+                  <span className="text-white font-semibold">1.</span> Realiza
+                  una inversión mínima de{" "}
+                  <span className="text-brand-amber font-bold">
+                    S/.100 o $30 USD
+                  </span>{" "}
+                  en tu propia cuenta de Blofin
+                </p>
+
+                <p className="text-lg">
+                  <span className="text-white font-semibold">2.</span> Usa
+                  nuestro{" "}
+                  <span className="text-brand-amber font-bold">
+                    link exclusivo
+                  </span>{" "}
+                  para crear tu cuenta
+                </p>
+
+                <p className="text-lg">
+                  <span className="text-white font-semibold">3.</span> Envíanos
+                  tu{" "}
+                  <span className="text-brand-amber font-bold">
+                    comprobante
+                  </span>{" "}
+                  por WhatsApp
                 </p>
               </div>
-            )}
 
+              <div className="mt-4 p-3 bg-amber-500/10 border border-amber-400/30 rounded-lg">
+                <p className="text-amber-300 text-sm font-electrolize">
+                  💡 <strong>Importante:</strong> La inversión es en tu propia
+                  cuenta, tú mantienes el control total de tus fondos.
+                </p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-4">
+              {/* Blofin Link Button */}
+              <Button
+                asChild
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg py-4 font-electrolize"
+              >
+                <a
+                  href="https://partner.blofin.com/d/criptouniversity"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 text-sm md:text-lg"
+                >
+                  <span>🔗</span>
+                  Crear cuenta en Blofin (Link exclusivo)
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </Button>
+
+              {/* WhatsApp Button */}
+              <Button
+                asChild
+                className="w-full bg-brand-amber hover:bg-brand-amber/90 text-black text-lg py-4 font-electrolize font-bold"
+              >
+                <a
+                  href={generateWhatsAppLink(whatsappMessage)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 text-sm md:text-lg"
+                >
+                  <WhatsAppIcon className="w-5 h-5" />
+                  Enviar comprobante por WhatsApp
+                </a>
+              </Button>
+            </div>
+
+            {/* Additional Info */}
+            <div className="mt-6 text-sm text-gray-400 font-electrolize">
+              <p>
+                Una vez verificado tu comprobante, recibirás acceso inmediato a:
+              </p>
+              <div className="mt-2 space-y-1 text-left max-w-md mx-auto">
+                <p>• 📚 Curso completo de trading crypto</p>
+                <p>• 💬 Comunidad privada en Discord y Telegram</p>
+                <p>• 📊 Señales diarias de trading</p>
+                <p>• 🎥 Sesiones en vivo semanales</p>
+                <p>• 🤝 Soporte personalizado 24/7</p>
+              </div>
+            </div>
+
+            {/* Back to Home */}
             <Button
               variant="outline"
               onClick={() => (window.location.href = "/")}
-              className="w-full border-emerald-500/30 text-black hover:bg-emerald-500/10 hover:text-white"
+              className="w-full mt-4 border-white/30 text-black hover:bg-white/10 font-electrolize"
             >
               Volver al inicio
             </Button>
@@ -952,28 +851,45 @@ const BusinessLeadForm: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#0f0f0f] relative text-white">
-      {/* Circuit Board - Dark Pattern */}
+    <div className="min-h-screen w-full bg-black relative text-white">
+      {/* Dark Dotted Grid Background - matching theme */}
       <div
-        className="absolute inset-0 z-0 pointer-events-none"
+        className="absolute inset-0 z-0"
         style={{
+          background: "#000000",
           backgroundImage: `
-            repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(34, 197, 94, 0.15) 19px, rgba(34, 197, 94, 0.15) 20px, transparent 20px, transparent 39px, rgba(34, 197, 94, 0.15) 39px, rgba(34, 197, 94, 0.15) 40px),
-            repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(34, 197, 94, 0.15) 19px, rgba(34, 197, 94, 0.15) 20px, transparent 20px, transparent 39px, rgba(34, 197, 94, 0.15) 39px, rgba(34, 197, 94, 0.15) 40px),
-            radial-gradient(circle at 20px 20px, rgba(16, 185, 129, 0.18) 2px, transparent 2px),
-            radial-gradient(circle at 40px 40px, rgba(16, 185, 129, 0.18) 2px, transparent 2px)
+            radial-gradient(circle, rgba(255, 255, 255, 0.2) 1.5px, transparent 1.5px)
           `,
-          backgroundSize: "40px 40px, 40px 40px, 40px 40px, 40px 40px",
+          backgroundSize: "30px 30px",
+          backgroundPosition: "0 0",
         }}
       />
 
+      {/* Gradient Overlays */}
+      <div className="absolute inset-0 z-5 bg-gradient-to-br from-blue-500/5 via-transparent to-amber-500/5" />
+      <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
+
       {/* Main container */}
-      <div className="relative z-10 w-full max-w-2xl mx-auto px-6 py-8 flex justify-center items-center min-h-screen">
+      <div className="relative z-20 w-full max-w-2xl mx-auto px-6 py-8 flex justify-center items-center min-h-screen">
         <div className="w-full">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-8"
+          >
+            <h1 className="text-3xl sm:text-4xl font-oxanium font-bold text-brand-amber mb-2">
+              Únete a CriptoUniversity
+            </h1>
+            <p className="text-gray-300 font-electrolize">
+              La primera universidad cripto gratuita de Latinoamérica
+            </p>
+          </motion.div>
+
           {/* Progress bar */}
-          <div className="w-full bg-emerald-500/20 rounded-full h-1 mb-8">
+          <div className="w-full bg-brand-amber/20 rounded-full h-1 mb-8">
             <motion.div
-              className="h-1 rounded-full bg-emerald-400"
+              className="h-1 rounded-full bg-brand-amber"
               initial={{ width: 0 }}
               animate={{
                 width: `${((currentQuestion + 1) / questions.length) * 100}%`,
@@ -994,21 +910,21 @@ const BusinessLeadForm: React.FC = () => {
                 className="absolute inset-0 flex flex-col items-start"
               >
                 {/* Question counter */}
-                <div className="text-emerald-400 text-sm mb-2">
+                <div className="text-brand-amber text-sm mb-2 font-electrolize">
                   {currentQuestion + 1} → {questions.length}
                 </div>
 
                 {/* Question text */}
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-white mb-2">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-medium text-white mb-2 font-oxanium">
                   {questions[currentQuestion].text}
                   {questions[currentQuestion].required && (
-                    <span className="text-emerald-400">*</span>
+                    <span className="text-brand-amber">*</span>
                   )}
                 </h2>
 
                 {/* Question description */}
                 {questions[currentQuestion].description && (
-                  <p className="text-gray-400 text-sm mb-6">
+                  <p className="text-gray-400 text-sm mb-6 font-electrolize">
                     {questions[currentQuestion].description}
                   </p>
                 )}
@@ -1018,7 +934,7 @@ const BusinessLeadForm: React.FC = () => {
 
                 {/* Error message */}
                 {error && (
-                  <div className="mt-3 text-red-300 text-sm bg-red-500/20 border border-red-500/30 rounded-md px-3 py-2">
+                  <div className="mt-3 text-red-300 text-sm bg-red-500/20 border border-red-500/30 rounded-md px-3 py-2 font-electrolize">
                     {error}
                   </div>
                 )}
@@ -1029,10 +945,10 @@ const BusinessLeadForm: React.FC = () => {
                     variant="ghost"
                     onClick={handlePrev}
                     disabled={currentQuestion === 0}
-                    className={`flex items-center gap-1 ${
+                    className={`flex items-center gap-1 font-electrolize ${
                       currentQuestion === 0
                         ? "opacity-0 pointer-events-none"
-                        : "text-gray-400 hover:text-white hover:bg-emerald-500/10"
+                        : "text-gray-400 hover:text-white hover:bg-brand-amber/10"
                     }`}
                   >
                     <ChevronLeft className="w-4 h-4" />
@@ -1042,22 +958,22 @@ const BusinessLeadForm: React.FC = () => {
                   <Button
                     onClick={handleNext}
                     disabled={isSubmitting}
-                    className={`flex items-center gap-1 ${
+                    className={`flex items-center gap-1 font-electrolize font-bold ${
                       isSubmitting
-                        ? "bg-emerald-700/50 text-white/70 cursor-not-allowed"
-                        : "bg-emerald-600 text-white hover:bg-emerald-700"
+                        ? "bg-brand-amber/50 text-black/70 cursor-not-allowed"
+                        : "bg-brand-amber text-black hover:bg-brand-amber/90"
                     }`}
                   >
                     {isSubmitting ? (
                       <>
                         <Spinner className="w-4 h-4 animate-spin" />
-                        <span>Enviando...</span>
+                        <span>Registrando...</span>
                       </>
                     ) : (
                       <>
                         <span>
                           {currentQuestion === questions.length - 1
-                            ? "Enviar"
+                            ? "Registrarme"
                             : "Siguiente"}
                         </span>
                         <ChevronRight className="w-4 h-4" />
@@ -1069,9 +985,9 @@ const BusinessLeadForm: React.FC = () => {
             </AnimatePresence>
           </div>
 
-          {/* Powered by */}
-          <div className="absolute bottom-2 right-2 text-gray-500 text-xs">
-            Powered by Tu Empresa • Full Send
+          {/* Footer */}
+          <div className="text-center mt-8 text-gray-500 text-xs font-electrolize">
+            Powered by CriptoUniversity • Santiago Chávez
           </div>
         </div>
       </div>
@@ -1114,4 +1030,4 @@ const WhatsAppIcon = ({ className = "w-6 h-6" }: { className?: string }) => (
   </svg>
 );
 
-export default BusinessLeadForm;
+export default CriptoUniversityForm;
