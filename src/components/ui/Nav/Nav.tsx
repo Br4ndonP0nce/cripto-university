@@ -81,10 +81,10 @@ const Navbar: React.FC<NavbarProps> = ({
               className="relative"
             >
               <span className="font-bold text-xl tracking-tight">
-                <span className="text-brand-orange bg-gradient-to-r bg-clip-text ">
+                <span className="text-brand-amber bg-gradient-to-r bg-clip-text ">
                   CRIPTO
                 </span>
-                <span className="text-brand-yellow">UNIVERSITY</span>
+                <span className="text-white">UNIVERSITY</span>
               </span>
               {/* Subtle glow effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-orange-600/20 blur-xl -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

@@ -27,18 +27,16 @@ const AboutSection: React.FC<AboutSectionProps> = ({
       <div
         className="absolute inset-0 z-0"
         style={{
-          background: "#000000",
+          background: "#141b33",
           backgroundImage: `
-            radial-gradient(circle, rgba(255, 255, 255, 0.2) 1.5px, transparent 1.5px)
-          `,
+              radial-gradient(circle, rgba(255, 255, 255, 0.2) 1.5px, transparent 1.5px)
+            `,
           backgroundSize: "30px 30px",
           backgroundPosition: "0 0",
         }}
       />
-
-      {/* Gradient Overlays */}
-      <div className="absolute inset-0 z-5 bg-gradient-to-br from-blue-500/5 via-transparent to-amber-500/5" />
       <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
+      <div className="absolute inset-0 z-5 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
 
       <div className="relative z-20 min-h-screen flex flex-col lg:flex-row items-center justify-center lg:justify-between px-4 sm:px-6 lg:px-12 xl:px-20 ">
         {/* Mobile Title - Shows first on mobile */}
