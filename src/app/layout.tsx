@@ -67,7 +67,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${quantico.variable} ${turretRoad.variable} ${oxanium.variable} ${electrolize.variable} ${zenDots.variable} antialiased`}
       >
-        <LenisProvider>{children}</LenisProvider>
+        {children}
       </body>
     </html>
   );
