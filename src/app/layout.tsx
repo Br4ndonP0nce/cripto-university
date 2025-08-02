@@ -8,8 +8,7 @@ import {
   Electrolize,
   Zen_Dots,
 } from "next/font/google";
-import ChatBot from "@/components/ui/ChatBot";
-import { ChatBotProvider } from "@/contexts/ChatBotContext";
+
 import { LenisProvider } from "@/contexts/LenisContext";
 import "./globals.css";
 
@@ -68,12 +67,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${quantico.variable} ${turretRoad.variable} ${oxanium.variable} ${electrolize.variable} ${zenDots.variable} antialiased`}
       >
-        <LenisProvider>
-          <ChatBotProvider>
-            {children}
-            <ChatBot />
-          </ChatBotProvider>
-        </LenisProvider>
+        <LenisProvider>{children}</LenisProvider>
       </body>
     </html>
   );

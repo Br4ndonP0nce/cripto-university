@@ -4,6 +4,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Footer from "@/components/ui/Footer/Footer";
 import { VideoPreloadProvider } from "@/contexts/VideoPreloadContent";
 import Navbar from "@/components/ui/Nav/Nav";
+import ChatBot from "@/components/ui/ChatBot";
+import { ChatBotProvider } from "@/contexts/ChatBotContext";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -26,9 +28,12 @@ export default function MarketingLayout({
 }>) {
   return (
     <div className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-      <Navbar />
-      {children}
-      <Footer />
+      <ChatBotProvider>
+        <Navbar />
+        {children}
+        <ChatBot />
+        <Footer />
+      </ChatBotProvider>
     </div>
   );
 }
