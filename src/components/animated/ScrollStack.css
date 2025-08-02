@@ -1,0 +1,227 @@
+/* Stack Component Styles */
+
+.section {
+    overflow: hidden;
+}
+
+.stack-wrapper {
+    height: 100vh;
+}
+
+.stack-list {
+    justify-content: flex-start;
+    align-items: center;
+    height: 100%;
+    display: flex;
+    position: relative;
+    padding: 0.2rem;
+}
+
+.stack-item {
+    width: 100vw;
+    height: 100%;
+    display: flex;
+    position: absolute;
+    inset: 0%;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+    overflow: hidden;
+    background-color: #fff;
+}
+
+.stack-item_number {
+    font-size: 1.5rem;
+    height: 3rem;
+    width: 3rem;
+    margin-bottom: 0.5rem;
+    border-radius: 50%;
+    background-color: #000;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 400;
+    position: absolute;
+    top: 6rem;
+    left: 3rem;
+    z-index: 10;
+}
+
+.stack-item_content {
+    background-color: #fff;
+    color: #292929;
+    flex-flow: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 3rem;
+    display: flex;
+    position: relative;
+    width: 50%;
+}
+
+.stack-item_title {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.stack-item_description {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #666;
+}
+
+.stack-item_media {
+    width: 50%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.stack-media-element {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Responsive Design */
+@media (max-width: 575.98px) {
+    .stack-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stack-item_content,
+    .stack-item_media {
+        height: 50vh;
+        width: 100%;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    .stack-item_content {
+        padding: 1.5rem;
+    }
+
+    .stack-item_number {
+        font-size: 1rem;
+        height: 2rem;
+        width: 2rem;
+        top: 1.5rem;
+        left: 1.5rem;
+    }
+
+    .stack-item_title {
+        font-size: 1.5rem;
+    }
+
+    .stack-item_description {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .stack-item_content {
+        padding: 2rem;
+    }
+
+    .stack-item_number {
+        top: 3rem;
+        left: 2rem;
+    }
+}
+
+/* Dark theme variants */
+.stack-item.dark {
+    background-color: #1a1a1a;
+}
+
+.stack-item.dark .stack-item_content {
+    background-color: #1a1a1a;
+    color: #fff;
+}
+
+.stack-item.dark .stack-item_description {
+    color: #ccc;
+}
+
+.stack-item.dark .stack-item_number {
+    background-color: #fff;
+    color: #000;
+}
+
+/* Custom animations and effects */
+.stack-item_media::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent 40%, rgba(0, 0, 0, 0.1) 50%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.stack-item:hover .stack-item_media::before {
+    opacity: 1;
+}
+
+/* Smooth transitions for better UX */
+.stack-item_content * {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.stack-item:hover .stack-item_title {
+    transform: translateY(-2px);
+}
+
+.stack-item:hover .stack-item_description {
+    opacity: 0.8;
+}
+
+/* Loading states */
+.stack-media-element {
+    transition: opacity 0.3s ease;
+}
+
+.stack-media-element[data-loading="true"] {
+    opacity: 0.7;
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+
+    .stack-item_content *,
+    .stack-item_media::before,
+    .stack-media-element {
+        transition: none;
+    }
+}
+
+/* Focus states for accessibility */
+.stack-item:focus-within {
+    outline: 2px solid #007acc;
+    outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+    .stack-section {
+        overflow: visible;
+    }
+
+    .stack-wrapper {
+        height: auto;
+    }
+
+    .stack-item {
+        position: static;
+        page-break-inside: avoid;
+        margin-bottom: 2rem;
+    }
+}
