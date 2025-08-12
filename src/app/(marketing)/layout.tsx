@@ -7,6 +7,8 @@ import Navbar from "@/components/ui/Nav/Nav";
 import ChatBot from "@/components/ui/ChatBot";
 import { ChatBotProvider } from "@/contexts/ChatBotContext";
 import { LenisProvider } from "@/contexts/LenisContext";
+import PreloaderProvider from "@/components/providers/PreloaderProvider";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -29,16 +31,18 @@ export default function MarketingLayout({
 }>) {
   return (
     <LenisProvider>
-      <div
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <ChatBotProvider>
-          <Navbar />
-          {children}
-          <ChatBot />
-          <Footer />
-        </ChatBotProvider>
-      </div>
+      <PreloaderProvider>
+        <div
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <ChatBotProvider>
+            <Navbar />
+            {children}
+            <ChatBot />
+            <Footer />
+          </ChatBotProvider>
+        </div>
+      </PreloaderProvider>
     </LenisProvider>
   );
 }

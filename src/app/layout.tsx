@@ -10,8 +10,6 @@ import {
   Aleo,
 } from "next/font/google";
 
-import { LenisProvider } from "@/contexts/LenisContext";
-import PreloaderProvider from "@/components/providers/PreloaderProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -75,9 +73,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${quantico.variable} ${turretRoad.variable} ${oxanium.variable} ${electrolize.variable} ${zenDots.variable} ${aleo.variable} antialiased`}
       >
-        <PreloaderProvider>
-          {children}
-        </PreloaderProvider>
+        {children}
       </body>
     </html>
   );
