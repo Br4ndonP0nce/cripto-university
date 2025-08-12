@@ -38,7 +38,7 @@ const AboutSection: React.FC<AboutSectionProps> = ({
       <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
       <div className="absolute inset-0 z-5 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
 
-      <div className="relative z-20 min-h-screen flex flex-col lg:flex-row items-center justify-center lg:justify-between px-4 sm:px-6 lg:px-12 xl:px-20 ">
+      <div className="relative z-20 min-h-screen flex flex-col lg:flex-row items-center justify-center lg:justify-between px-4 sm:px-6 lg:px-12 xl:px-20 py-5 ">
         {/* Mobile Title - Shows first on mobile */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -147,7 +147,7 @@ const AboutSection: React.FC<AboutSectionProps> = ({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
           >
-            <p className="text-lg sm:text-xl md:text-2xl text-gray-300 leading-relaxed font-electrolize">
+            <p className="text-lg sm:text-xl md:text-2xl text-gray-300 leading-relaxed font-aleo">
               La primera universidad cripto gratuita fundada por Santiago
               Chávez, reconocido influencer con años de trayectoria en el mundo
               crypto y empresarial. Aprende trading, únete a nuestra comunidad y
@@ -173,7 +173,7 @@ const AboutSection: React.FC<AboutSectionProps> = ({
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className=" text-lg font-bold rounded-2xl font-electrolize"
+                    className=" text-lg font-semibold rounded-2xl font-aleo"
                   >
                     Únete Gratis →
                   </motion.button>
@@ -182,7 +182,7 @@ const AboutSection: React.FC<AboutSectionProps> = ({
             </div>
 
             {/* Trust Indicator */}
-            <p className="text-sm text-gray-400 font-electrolize">
+            <p className="text-sm text-gray-400 font-aleo font-light">
               Fundado por Santiago Chávez
             </p>
           </motion.div>

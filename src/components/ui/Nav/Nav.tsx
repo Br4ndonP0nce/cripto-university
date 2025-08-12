@@ -3,6 +3,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { MenuIcon, X } from "lucide-react";
@@ -71,7 +72,7 @@ const Navbar: React.FC<NavbarProps> = ({
           className
         )}
       >
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
+        <div className="flex items-center justify-between w-full">
           {/* Logo */}
           <Link href={logoUrl} className="flex items-center gap-2">
             <motion.div
@@ -80,12 +81,14 @@ const Navbar: React.FC<NavbarProps> = ({
               transition={{ duration: 0.2 }}
               className="relative"
             >
-              <span className="font-bold text-xl tracking-tight">
-                <span className="text-brand-amber bg-gradient-to-r bg-clip-text ">
-                  CRIPTO
-                </span>
-                <span className="text-white">UNIVERSITY</span>
-              </span>
+              <Image
+                src="/image/Logos/navLogo.png"
+                alt="Crypto University"
+                width={40}
+                height={40}
+                className="h-auto"
+                priority
+              />
               {/* Subtle glow effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-orange-600/20 blur-xl -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </motion.div>
@@ -103,7 +106,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 <Link
                   href={item.href}
                   className={cn(
-                    "relative px-4 py-2 text-sm font-medium transition-all duration-200",
+                    "relative px-4 py-2 text-sm font-aleo transition-all duration-200",
                     "text-gray-300 hover:text-white",
                     "rounded-lg hover:bg-white/5",
                     "group"
@@ -132,7 +135,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 onClick={onCtaClick}
                 asChild={!onCtaClick}
                 className={cn(
-                  "bg-gradient-to-r from-orange-500 to-orange-600",
+                  "bg-gradient-to-r from-orange-500 to-orange-600 font-aleo",
                   "hover:from-orange-600 hover:to-orange-700",
                   "text-white font-semibold px-6 py-2",
                   "rounded-lg shadow-lg shadow-orange-500/25",

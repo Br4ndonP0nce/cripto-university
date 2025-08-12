@@ -4,6 +4,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Common Development Commands
 
+**Note**: The user handles running npm commands themselves. Do not execute npm commands unless explicitly requested.
+
 ```bash
 # Development
 npm run dev          # Start development server with Turbopack

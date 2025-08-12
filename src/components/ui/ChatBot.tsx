@@ -1,58 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, MessageCircle, Send } from "lucide-react";
+import { X, MessageCircle, Send, Loader2 } from "lucide-react";
+import { useChat } from '@ai-sdk/react';
+import { DefaultChatTransport } from 'ai';
 import { useChatBot } from "@/contexts/ChatBotContext";
-
-interface Message {
-  id: string;
-  text: string;
-  sender: "user" | "bot";
-  timestamp: Date;
-}
 
 const ChatBot = () => {
   const { isOpen, openChat, closeChat } = useChatBot();
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      text: "¡Hola! Soy el asistente de CriptoUniversity. ¿En qué puedo ayudarte hoy?",
-      sender: "bot",
-      timestamp: new Date(),
-    },
-  ]);
-  const [inputText, setInputText] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [input, setInput] = useState('');
+  
+  const { messages, sendMessage, status } = useChat({
+    transport: new DefaultChatTransport({
+      api: '/api/chat',
+    }),
+  });
 
-  const handleSendMessage = () => {
-    if (!inputText.trim()) return;
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      text: inputText,
-      sender: "user",
-      timestamp: new Date(),
-    };
-
-    setMessages((prev) => [...prev, newMessage]);
-    setInputText("");
-
-    // Simulate bot response
-    setTimeout(() => {
-      const botResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        text: "Gracias por tu mensaje. Un miembro de nuestro equipo te responderá pronto. Mientras tanto, puedes explorar nuestros cursos gratuitos.",
-        sender: "bot",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botResponse]);
-    }, 1000);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (input.trim() && status === 'ready') {
+      sendMessage({ text: input });
+      setInput('');
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      handleSubmit(e);
     }
   };
 
@@ -114,23 +96,46 @@ const ChatBot = () => {
 
               {/* Messages */}
               <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+                {/* Welcome message when no messages */}
+                {messages.length === 0 && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-800 text-gray-200 mr-4 px-4 py-2 rounded-2xl max-w-xs">
+                      <div className="text-sm whitespace-pre-wrap">
+                        ¡Hola! Soy el asistente de CriptoUniversity. ¿En qué puedo ayudarte hoy? Puedo responder preguntas sobre criptomonedas, blockchain, cursos, trading y mucho más.
+                      </div>
+                      <p className="text-xs opacity-60 mt-1">
+                        {new Date().toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                
                 {messages.map((message) => (
                   <div
                     key={message.id}
                     className={`flex ${
-                      message.sender === "user" ? "justify-end" : "justify-start"
+                      message.role === "user" ? "justify-end" : "justify-start"
                     }`}
                   >
                     <div
                       className={`max-w-xs px-4 py-2 rounded-2xl ${
-                        message.sender === "user"
+                        message.role === "user"
                           ? "bg-blue-600 text-white ml-4"
                           : "bg-gray-800 text-gray-200 mr-4"
                       }`}
                     >
-                      <p className="text-sm">{message.text}</p>
+                      <div className="text-sm whitespace-pre-wrap">
+                        {message.parts.map((part, index) =>
+                          part.type === 'text' ? (
+                            <span key={index}>{part.text}</span>
+                          ) : null
+                        )}
+                      </div>
                       <p className="text-xs opacity-60 mt-1">
-                        {message.timestamp.toLocaleTimeString([], {
+                        {new Date().toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
@@ -138,27 +143,45 @@ const ChatBot = () => {
                     </div>
                   </div>
                 ))}
+                
+                {/* Loading indicator */}
+                {status === 'streaming' && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-800 text-gray-200 mr-4 px-4 py-2 rounded-2xl flex items-center space-x-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span className="text-sm">Escribiendo...</span>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Auto-scroll anchor */}
+                <div ref={messagesEndRef} />
               </div>
 
               {/* Input */}
               <div className="p-4 border-t border-gray-700">
-                <div className="flex items-center space-x-2">
+                <form onSubmit={handleSubmit} className="flex items-center space-x-2">
                   <input
                     type="text"
-                    value={inputText}
-                    onChange={(e) => setInputText(e.target.value)}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Escribe tu mensaje..."
-                    className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-full text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 transition-colors"
+                    disabled={status !== 'ready'}
+                    className="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-full text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 transition-colors disabled:opacity-50"
                   />
                   <button
-                    onClick={handleSendMessage}
-                    disabled={!inputText.trim()}
+                    type="submit"
+                    disabled={status !== 'ready'}
                     className="w-10 h-10 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed rounded-full flex items-center justify-center transition-colors"
                   >
-                    <Send className="w-4 h-4 text-white" />
+                    {status === 'streaming' ? (
+                      <Loader2 className="w-4 h-4 text-white animate-spin" />
+                    ) : (
+                      <Send className="w-4 h-4 text-white" />
+                    )}
                   </button>
-                </div>
+                </form>
               </div>
             </motion.div>
           </motion.div>

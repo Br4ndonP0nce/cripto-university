@@ -48,7 +48,7 @@ const BlofinModal: React.FC<BlofinModalProps> = ({ isOpen, onClose }) => {
               <div className="relative z-20 p-6">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-white">
+                  <h2 className="text-xl font-bold text-white font-aleo">
                     ¿Qué es Blofin?
                   </h2>
                   <motion.button
@@ -63,7 +63,7 @@ const BlofinModal: React.FC<BlofinModalProps> = ({ isOpen, onClose }) => {
 
                 {/* Content */}
                 <div className="space-y-4">
-                  <p className="text-gray-300 text-sm leading-relaxed">
+                  <p className="text-gray-300 text-sm leading-relaxed font-aleo">
                     <strong className="text-white">Blofin</strong> es una
                     plataforma de trading regulada y segura. La necesitamos para
                     verificar tu compromiso con el aprendizaje.
@@ -72,11 +72,11 @@ const BlofinModal: React.FC<BlofinModalProps> = ({ isOpen, onClose }) => {
                   <div className="bg-blue-500/10 rounded-lg p-4 border border-blue-400/20">
                     <div className="flex items-center space-x-2 mb-2">
                       <CheckCircle className="w-4 h-4 text-green-400" />
-                      <span className="text-white font-semibold text-sm">
+                      <span className="text-white font-semibold text-sm font-aleo">
                         Completamente transparente:
                       </span>
                     </div>
-                    <ul className="text-gray-300 text-sm space-y-1">
+                    <ul className="text-gray-300 text-sm space-y-1 font-aleo font-light">
                       <li>• No nos pagas nada directamente</li>
                       <li>• Solo activas tu cuenta personal</li>
                       <li>
@@ -88,7 +88,7 @@ const BlofinModal: React.FC<BlofinModalProps> = ({ isOpen, onClose }) => {
                   </div>
 
                   {/* CTA */}
-                  <div className="flex gap-3 pt-2">
+                  <div className="flex gap-3 pt-2 font-aleo">
                     <Link href="/join" className="flex-1">
                       <motion.button
                         onClick={onClose}

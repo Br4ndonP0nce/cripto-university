@@ -7,9 +7,11 @@ import {
   Oxanium,
   Electrolize,
   Zen_Dots,
+  Aleo,
 } from "next/font/google";
 
 import { LenisProvider } from "@/contexts/LenisContext";
+import PreloaderProvider from "@/components/providers/PreloaderProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -52,6 +54,12 @@ const zenDots = Zen_Dots({
   weight: ["400"],
 });
 
+const aleo = Aleo({
+  variable: "--font-aleo",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+});
+
 export const metadata: Metadata = {
   title: "Cripto University",
   description: "Cripto University",
@@ -65,9 +73,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${quantico.variable} ${turretRoad.variable} ${oxanium.variable} ${electrolize.variable} ${zenDots.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${quantico.variable} ${turretRoad.variable} ${oxanium.variable} ${electrolize.variable} ${zenDots.variable} ${aleo.variable} antialiased`}
       >
-        {children}
+        <PreloaderProvider>
+          {children}
+        </PreloaderProvider>
       </body>
     </html>
   );
