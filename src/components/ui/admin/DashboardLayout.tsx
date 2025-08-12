@@ -136,8 +136,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
           <Link href="/">
             <div className="flex items-center">
               <Image
-                src="/image/logo.png"
-                alt="Edición Persuasiva"
+                src="/image/logos/logo3.png"
+                alt="CriptoUniversity"
                 width={120}
                 height={30}
                 className="h-8 w-auto"
