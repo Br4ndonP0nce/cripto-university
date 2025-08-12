@@ -119,7 +119,7 @@ const BenefitCard = ({ benefit }: { benefit: Benefit }) => {
           </p>
 
           <Link href="/join" className="">
-            <div className="flex items-center space-x-2 text-sm text-gray-400 hover:scale-102 hover:text-white/90 duration-300 font-electrolize">
+            <div className="flex items-center space-x-2 text-sm text-gray-400 hover:scale-102 hover:text-white/90 duration-300 font-aleo">
               <div className="w-2 h-2 rounded-full bg-white/60" />
               <span>Unete gratis!</span>
             </div>
@@ -214,7 +214,7 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-oxanium font-bold text-brand-amber leading-tight">
             Beneficios <span className="text-white bg-clip-text ">Únicos</span>
           </h2>
-          <p className="text-lg text-gray-300 font-electrolize font-light max-w-2xl mx-auto lg:mx-0">
+          <p className="text-lg text-gray-300 font-aleo font-light max-w-2xl mx-auto lg:mx-0">
             Descubre las ventajas que solo CriptoUniversity puede ofrecerte en
             tu camino hacia el dominio de las criptomonedas
           </p>
@@ -245,7 +245,7 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
               </div>
 
               {/* Content */}
-              <div className="text-gray-300">{item.content}</div>
+              <div className="text-gray-300 font-aleo">{item.content}</div>
             </div>
           </div>
         ))}
@@ -321,7 +321,7 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.4 }}
-              className="text-center text-gray-400 text-xs md:sm mt-4 font-light"
+              className="text-center text-gray-400 text-xs md:sm mt-4 font-aleo font-light"
             >
               Sin tarjeta de crédito • Acceso inmediato • Comunidad exclusiva
             </motion.p>

@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import {
   GraduationCap,
   Mail,
@@ -97,13 +98,14 @@ const Footer: React.FC = () => {
               transition={{ duration: 0.6 }}
               className="space-y-4"
             >
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-400 rounded-xl flex items-center justify-center">
-                  <GraduationCap className="w-6 h-6 text-white" />
-                </div>
-                <span className="text-xl font-bold text-white">
-                  CriptoUniversity
-                </span>
+              <div className="flex items-center">
+                <Image
+                  src="/image/Logos/navLogo.png"
+                  alt="Cripto University Logo"
+                  width={180}
+                  height={60}
+                  className="w-auto h-8 object-contain"
+                />
               </div>
 
               <p className="text-gray-400 text-sm leading-relaxed">
@@ -262,7 +264,8 @@ const Footer: React.FC = () => {
             {/* Copyright */}
             <div className="flex items-center space-x-2 text-gray-400 text-sm">
               <span>
-                © {currentYear} CriptoUniversity. Todos los derechos reservados.
+                © {currentYear} Cripto University. Todos los derechos
+                reservados.
               </span>
               <Heart className="w-4 h-4 text-red-400" />
             </div>
