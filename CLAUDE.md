@@ -91,3 +91,32 @@ Firebase configuration requires environment variables:
 - `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
 - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
 - `NEXT_PUBLIC_FIREBASE_APP_ID`
+
+## API Endpoints & Webhooks
+
+### N8N Integration
+The application integrates with n8n for automated WhatsApp workflows:
+
+**Webhook Endpoints:**
+- `POST /api/webhook/n8n` - Receives n8n webhook data to update lead status
+- `GET /api/webhook/n8n` - Health check endpoint
+
+**Form Submission Flow:**
+1. User submits registration form (`src/components/ui/Form/Form.tsx`)
+2. Data is saved to Firebase Firestore
+3. Data is simultaneously sent to n8n webhook: `https://n8n-n8n.gbuazv.easypanel.host/webhook-test/3c838fa7-171c-472c-a4f9-842f3575cb8e`
+4. n8n processes WhatsApp automation
+5. n8n sends updates back to our webhook to update lead status
+
+**Supported Webhook Actions:**
+- `blofin_investment_completed` - Marks investment as completed and grants access
+- `blofin_proof_uploaded` - Updates proof status without completing investment
+
+**Phone Number Lookup:**
+- Added `getLeadByPhone()` function in `src/lib/firebase/db.ts`
+- Handles exact phone matches and cleaned phone number fallbacks
+- Used by webhook to find leads by WhatsApp phone number
+
+**RBAC Integration:**
+- Webhook operations are logged with `performedBy: 'n8n_webhook'`
+- Status updates trigger history logging via existing `updateBlofinInvestment()` function
