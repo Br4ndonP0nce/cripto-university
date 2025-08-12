@@ -342,6 +342,44 @@ export const searchLeads = async (searchTerm: string): Promise<Lead[]> => {
 };
 
 /**
+ * Find a student by phone number
+ */
+export const getLeadByPhone = async (phone: string): Promise<Lead | null> => {
+  try {
+    // Clean phone number (remove spaces, dashes, etc.)
+    const cleanPhone = phone.replace(/\D/g, '');
+    
+    // Try exact match first
+    let q = query(
+      collection(db, LEADS_COLLECTION),
+      where('phone', '==', phone)
+    );
+    
+    let querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty && cleanPhone !== phone) {
+      // Try with cleaned phone number if exact match fails
+      q = query(
+        collection(db, LEADS_COLLECTION),
+        where('phone', '==', cleanPhone)
+      );
+      
+      querySnapshot = await getDocs(q);
+    }
+    
+    if (querySnapshot.empty) {
+      return null;
+    }
+    
+    const doc = querySnapshot.docs[0];
+    return { id: doc.id, ...doc.data() } as Lead;
+  } catch (error) {
+    console.error('Error finding student by phone:', error);
+    throw error;
+  }
+};
+
+/**
  * Get students by country
  */
 export const getStudentsByCountry = async (country: string): Promise<Lead[]> => {

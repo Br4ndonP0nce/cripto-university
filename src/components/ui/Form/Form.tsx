@@ -371,6 +371,37 @@ const CriptoUniversityForm: React.FC = () => {
       const leadId = await addLead(leadData);
       console.log("Student successfully registered with ID:", leadId);
 
+      // Send data to n8n webhook via proxy
+      try {
+        const webhookResponse = await fetch("/api/n8n-proxy", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            phone: answers.phone || "",
+            name: answers.name || "",
+            email: answers.email || "",
+            country: answers.country_text || answers.country || "",
+            leadId: leadId,
+            timestamp: new Date().toISOString(),
+            source: "criptouniversity_form"
+          }),
+        });
+
+        const webhookData = await webhookResponse.json();
+        console.log("Webhook response:", webhookData);
+        
+        if (webhookResponse.ok) {
+          console.log("Successfully sent data to n8n webhook");
+        } else {
+          console.warn("Failed to send data to n8n webhook:", webhookResponse.status, webhookData);
+        }
+      } catch (webhookError) {
+        console.error("Error sending to n8n webhook:", webhookError);
+        // Don't fail the whole submission if webhook fails
+      }
+
       setIsSubmitted(true);
 
       // Success toast
