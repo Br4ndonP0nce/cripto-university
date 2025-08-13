@@ -76,11 +76,11 @@ const CriptoUniversityHero: React.FC<CriptoUniversityHeroProps> = ({
             {/* Main Headline */}
             <div className="flex justify-center lg:justify-start mb-4">
               <Image
-                src="/image/Logos/logo3.png"
+                src="/image/Logos/mainLogo.png"
                 alt="Cripto University Logo"
                 width={500}
                 height={200}
-                className="w-auto h-20 sm:h-24 lg:h-32 object-contain"
+                className="w-auto  object-contain"
                 priority
               />
             </div>
