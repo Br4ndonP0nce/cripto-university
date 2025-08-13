@@ -82,9 +82,9 @@ const Navbar: React.FC<NavbarProps> = ({
               className="relative"
             >
               <Image
-                src="/image/Logos/logoWhite.png"
+                src="/image/Logos/logoWhite2.png"
                 alt="Crypto University"
-                width={160}
+                width={140}
                 height={40}
                 className="h-auto"
                 priority
