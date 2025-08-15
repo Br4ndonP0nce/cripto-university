@@ -80,7 +80,7 @@ const CriptoUniversityHero: React.FC<CriptoUniversityHeroProps> = ({
             <h1 className=" font-bold leading-tight font-oxanium">
               <TextType
                 as="span"
-                text="La primera universidad cripto gratuita"
+                text="La primera universidad cripto 100% gratuita"
                 typingSpeed={35}
                 showCursor={true}
                 className="text-white text-3xl  md:text-4xl"
