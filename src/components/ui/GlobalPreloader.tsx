@@ -29,26 +29,18 @@ const GlobalPreloader: React.FC<GlobalPreloaderProps> = ({ onComplete }) => {
         transition: { duration: 0.6, ease: [0.23, 1, 0.32, 1] },
       }}
     >
-      {/* Dark White Dotted Grid Background */}
+      {/* Violet Storm Background with Top Glow */}
       <div
         className="absolute inset-0 z-0"
         style={{
-          background: "#141b33",
-          backgroundImage: `
-                radial-gradient(circle, rgba(255, 255, 255, 0.2) 1.5px, transparent 1.5px)
-              `,
-          backgroundSize: "30px 30px",
-          backgroundPosition: "0 0",
+          background:
+            "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(139, 92, 246, 0.25), transparent 70%), #000000",
         }}
       />
 
-      {/* Subtle Gradient Overlays */}
-      <div className="absolute inset-0 z-5 bg-gradient-to-br from-blue-500/5 via-transparent to-amber-500/5" />
-      <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
-
       <div className="relative z-20 text-center">
         <Image
-          src="/image/Logos/mainLogo.png"
+          src="/image/Logos/preloadLogoHard.png"
           alt="Cripto University Logo"
           width={600}
           height={240}
@@ -64,13 +56,6 @@ const GlobalPreloader: React.FC<GlobalPreloaderProps> = ({ onComplete }) => {
           La primera universidad cripto gratuita
         </motion.p>
       </div>
-
-      {/* Enhanced Ambient Effects */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/15 rounded-full blur-3xl animate-pulse opacity-60" />
-      <div
-        className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl animate-pulse opacity-60"
-        style={{ animationDelay: "3s" }}
-      />
     </motion.div>
   );
 };
