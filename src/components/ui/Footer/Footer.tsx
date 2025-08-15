@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -71,33 +70,15 @@ const Footer: React.FC = () => {
 
   return (
     <footer className="relative bg-black border-t border-white/10 overflow-hidden">
-      {/* Dark Dotted Grid Background */}
-      <div
-        className="absolute inset-0 z-0"
-        style={{
-          background: "#000000",
-          backgroundImage: `
-            radial-gradient(circle, rgba(255, 255, 255, 0.1) 1.5px, transparent 1.5px)
-          `,
-          backgroundSize: "30px 30px",
-          backgroundPosition: "0 0",
-        }}
-      />
-
-      {/* Gradient Overlay */}
-      <div className="absolute inset-0 z-10 bg-gradient-to-t from-black via-transparent to-black/50" />
+      {/* Dark Background */}
+      <div className="absolute inset-0 z-0 bg-black" />
 
       <div className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand Section */}
-          <div className="lg:col-span-1 space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="space-y-4"
-            >
+          <div className="col-span-2 lg:col-span-1 space-y-6">
+            <div className="space-y-4">
               <div className="flex items-center">
                 <Image
                   src="/image/Logos/navLogo.png"
@@ -109,7 +90,7 @@ const Footer: React.FC = () => {
               </div>
 
               <p className="text-gray-400 text-sm leading-relaxed">
-                La primera universidad cripto gratuita. Aprende, invierte y
+                La primera universidad cripto 100% gratuita. Aprende, invierte y
                 crece con los mejores.
               </p>
 
@@ -124,18 +105,13 @@ const Footer: React.FC = () => {
                   <span className="text-blue-400 font-semibold">Blofin</span>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
 
           {/* Links Sections */}
-          <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-8">
+          <div className="col-span-2 lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-8">
             {/* Platform Links */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              className="space-y-4"
-            >
+            <div className="space-y-4">
               <h3 className="text-white font-semibold flex items-center space-x-2">
                 <BookOpen className="w-4 h-4 text-blue-400" />
                 <span>Plataforma</span>
@@ -152,15 +128,10 @@ const Footer: React.FC = () => {
                   </li>
                 ))}
               </ul>
-            </motion.div>
+            </div>
 
             {/* Resources Links */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="space-y-4"
-            >
+            <div className="space-y-4">
               <h3 className="text-white font-semibold flex items-center space-x-2">
                 <TrendingUp className="w-4 h-4 text-green-400" />
                 <span>Recursos</span>
@@ -177,15 +148,10 @@ const Footer: React.FC = () => {
                   </li>
                 ))}
               </ul>
-            </motion.div>
+            </div>
 
             {/* Legal Links */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="space-y-4"
-            >
+            <div className="space-y-4">
               <h3 className="text-white font-semibold flex items-center space-x-2">
                 <Shield className="w-4 h-4 text-amber-400" />
                 <span>Legal</span>
@@ -202,17 +168,12 @@ const Footer: React.FC = () => {
                   </li>
                 ))}
               </ul>
-            </motion.div>
+            </div>
           </div>
 
           {/* Contact & Social */}
-          <div className="lg:col-span-1 space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="space-y-4"
-            >
+          <div className="col-span-2 lg:col-span-1 space-y-6">
+            <div className="space-y-4">
               <h3 className="text-white font-semibold flex items-center space-x-2">
                 <Users className="w-4 h-4 text-purple-400" />
                 <span>Comunidad</span>
@@ -235,31 +196,24 @@ const Footer: React.FC = () => {
                 </p>
                 <div className="flex space-x-3">
                   {socialLinks.map((social) => (
-                    <motion.a
+                    <a
                       key={social.name}
                       href={social.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      whileHover={{ scale: 1.1, y: -2 }}
-                      whileTap={{ scale: 0.95 }}
                       className={`w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center ${social.color} hover:bg-white/20 transition-all duration-200`}
                     >
                       <social.icon className="w-4 h-4" />
-                    </motion.a>
+                    </a>
                   ))}
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
 
         {/* Bottom Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.5 }}
-          className="mt-12 pt-8 border-t border-white/10"
-        >
+        <div className="mt-12 pt-8 border-t border-white/10">
           <div className="flex flex-col lg:flex-row justify-between items-center space-y-4 lg:space-y-0">
             {/* Copyright */}
             <div className="flex items-center space-x-2 text-gray-400 text-sm">
@@ -283,7 +237,7 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Quick Disclaimer */}
-        </motion.div>
+        </div>
       </div>
     </footer>
   );

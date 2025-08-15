@@ -12,8 +12,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const navItems = [
-  { name: "About", href: "#" },
-  { name: "Join", href: "#" },
+  { name: "Nosotros", href: "#" },
+  { name: "Join", href: "/join" },
 ];
 
 interface NavbarProps {
@@ -28,7 +28,7 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({
   logo = "CA",
   logoUrl = "/",
-  ctaText = "Unete Ahora",
+  ctaText = "Únete Ahora",
   ctaHref = "/join",
   onCtaClick,
   className,
@@ -152,37 +152,66 @@ const Navbar: React.FC<NavbarProps> = ({
             </motion.div>
           </nav>
 
-          {/* Mobile Menu Button */}
-          <motion.button
-            className="md:hidden p-2 rounded-lg hover:bg-white/5 transition-colors duration-200"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-            whileTap={{ scale: 0.95 }}
-          >
-            <AnimatePresence mode="wait">
-              {mobileMenuOpen ? (
-                <motion.div
-                  key="close"
-                  initial={{ rotate: -90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: 90, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <X className="h-6 w-6 text-white" />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="menu"
-                  initial={{ rotate: 90, opacity: 0 }}
-                  animate={{ rotate: 0, opacity: 1 }}
-                  exit={{ rotate: -90, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <MenuIcon className="h-6 w-6 text-white" />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.button>
+          {/* Mobile CTA + Burger Container */}
+          <div className="md:hidden flex items-center space-x-3">
+            {/* Mobile CTA Button */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+            >
+              <Button
+                onClick={onCtaClick}
+                asChild={!onCtaClick}
+                className={cn(
+                  "bg-gradient-to-r from-orange-500 to-orange-600 font-aleo",
+                  "hover:from-orange-600 hover:to-orange-700",
+                  "text-white font-semibold px-3 py-1.5 text-xs",
+                  "rounded-lg shadow-lg shadow-orange-500/25",
+                  "transition-all duration-200",
+                  "hover:scale-105 hover:shadow-orange-500/40"
+                )}
+              >
+                {onCtaClick ? (
+                  <span>{ctaText}</span>
+                ) : (
+                  <Link href={ctaHref}>{ctaText}</Link>
+                )}
+              </Button>
+            </motion.div>
+
+            {/* Mobile Menu Button */}
+            <motion.button
+              className="p-2 rounded-lg hover:bg-white/5 transition-colors duration-200"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+              whileTap={{ scale: 0.95 }}
+            >
+              <AnimatePresence mode="wait">
+                {mobileMenuOpen ? (
+                  <motion.div
+                    key="close"
+                    initial={{ rotate: -90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: 90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <X className="h-6 w-6 text-white" />
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="menu"
+                    initial={{ rotate: 90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: -90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <MenuIcon className="h-6 w-6 text-white" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
@@ -217,32 +246,6 @@ const Navbar: React.FC<NavbarProps> = ({
                       </Link>
                     </motion.div>
                   ))}
-
-                  {/* Mobile CTA */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.4 }}
-                    className="pt-4"
-                  >
-                    <Button
-                      onClick={handleCtaClick}
-                      asChild={!onCtaClick}
-                      className={cn(
-                        "w-full bg-gradient-to-r from-orange-500 to-orange-600",
-                        "hover:from-orange-600 hover:to-orange-700",
-                        "text-white font-semibold py-3",
-                        "rounded-lg shadow-lg shadow-orange-500/25",
-                        "transition-all duration-200"
-                      )}
-                    >
-                      {onCtaClick ? (
-                        <span>{ctaText}</span>
-                      ) : (
-                        <Link href={ctaHref}>{ctaText}</Link>
-                      )}
-                    </Button>
-                  </motion.div>
                 </div>
               </div>
             </motion.div>

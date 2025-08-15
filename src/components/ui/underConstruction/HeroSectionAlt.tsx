@@ -62,14 +62,14 @@ const CriptoUniversityHero: React.FC<CriptoUniversityHeroProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
-          className="relative z-20 min-h-[calc(100vh-4rem)] sm:min-h-[calc(100vh-5rem)] md:min-h-screen flex flex-col-reverse lg:flex-row items-center justify-center lg:justify-between px-4 sm:px-6 lg:px-12 xl:px-20 py-12 lg:py-15 md:py-0 "
+          className="relative z-20 min-h-[calc(100vh-4rem)] sm:min-h-[calc(100vh-5rem)] md:min-h-screen flex flex-col-reverse lg:flex-row items-center justify-center lg:justify-between px-4 sm:px-6 lg:px-12 xl:px-20 py-12 md:py-16 lg:py-20"
         >
           {/* Left Content */}
-          <div className="flex-1 max-w-3xl space-y-6 sm:space-y-8 lg:pr-12 text-center  lg:text-left md:mt-50 lg:mt-0">
+          <div className="flex-1 max-w-3xl space-y-6 sm:space-y-8 lg:pr-12 text-center lg:text-left">
             <h1 className=" font-bold leading-tight font-oxanium">
               <TextType
                 as="span"
-                text="La primera universidad cripto gratuita"
+                text="La primera universidad cripto 100% gratuita"
                 typingSpeed={35}
                 showCursor={true}
                 className="text-white text-3xl  md:text-4xl"
@@ -144,7 +144,7 @@ const CriptoUniversityHero: React.FC<CriptoUniversityHeroProps> = ({
           </div>
 
           {/* Right Side - Logo Shield */}
-          <div className="flex-1 max-w-lg flex items-center justify-center mt-4 sm:mt-6 lg:mt-0">
+          <div className="flex-1 max-w-lg flex items-center justify-center mt-6 md:mt-8 lg:mt-0">
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}

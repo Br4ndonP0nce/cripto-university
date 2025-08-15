@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import DarkVeil from "../animated/DarkVeil";
 
 import {
   validateEmail,
@@ -385,17 +386,21 @@ const CriptoUniversityForm: React.FC = () => {
             country: answers.country_text || answers.country || "",
             leadId: leadId,
             timestamp: new Date().toISOString(),
-            source: "criptouniversity_form"
+            source: "criptouniversity_form",
           }),
         });
 
         const webhookData = await webhookResponse.json();
         console.log("Webhook response:", webhookData);
-        
+
         if (webhookResponse.ok) {
           console.log("Successfully sent data to n8n webhook");
         } else {
-          console.warn("Failed to send data to n8n webhook:", webhookResponse.status, webhookData);
+          console.warn(
+            "Failed to send data to n8n webhook:",
+            webhookResponse.status,
+            webhookData
+          );
         }
       } catch (webhookError) {
         console.error("Error sending to n8n webhook:", webhookError);
@@ -588,20 +593,20 @@ const CriptoUniversityForm: React.FC = () => {
                   type="button"
                   variant="outline"
                   onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-                  className="flex items-center bg-[#1a1a1a] border-brand-amber/30 text-white hover:bg-[#2a2a2a] min-w-[80px]"
+                  className="flex items-center bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 min-w-[70px] text-sm transition-all duration-200"
                 >
                   {selectedCode}
                   <ChevronDown className="ml-1 w-4 h-4" />
                 </Button>
 
                 {showCountryDropdown && (
-                  <div className="absolute top-full left-0 mt-1 bg-[#1a1a1a] border border-brand-amber/30 rounded-md z-10 w-64">
-                    <ScrollArea className="h-60">
+                  <div className="absolute top-full left-0 mt-1 bg-black/80 backdrop-blur-md border border-white/20 rounded-md z-10 w-48 shadow-lg">
+                    <ScrollArea className="h-40">
                       {countryCodes.map((country, index) => (
                         <button
                           key={`${country.code}-${country.country}-${index}`}
                           type="button"
-                          className="block w-full text-left px-3 py-2 hover:bg-brand-amber/20 text-white text-sm"
+                          className="block w-full text-left px-2 py-1.5 hover:bg-white/10 text-white text-xs transition-colors duration-200"
                           onClick={() => {
                             setSelectedCode(country.code);
                             setShowCountryDropdown(false);
@@ -615,8 +620,12 @@ const CriptoUniversityForm: React.FC = () => {
                             }
                           }}
                         >
-                          <span className="font-medium">{country.code}</span>{" "}
-                          {country.country}
+                          <span className="font-medium text-xs">
+                            {country.code}
+                          </span>
+                          <span className="ml-1 text-xs truncate">
+                            {country.country}
+                          </span>
                         </button>
                       ))}
                     </ScrollArea>
@@ -690,35 +699,35 @@ const CriptoUniversityForm: React.FC = () => {
       case "select":
         return (
           <div className="w-full">
-            <ScrollArea className="h-72 w-full border border-brand-amber/30 rounded-md">
-              <div className="p-2 space-y-2">
+            <ScrollArea className="h-60 w-full border border-white/20 rounded-md bg-black/30 backdrop-blur-sm">
+              <div className="p-1 space-y-1">
                 {question.options?.map((option) => (
                   <Button
                     key={option.id}
                     onClick={() => handleOptionSelect(option.id, option.text)}
                     variant="outline"
-                    className={`w-full text-left justify-start h-auto p-3 ${
+                    className={`w-full text-left justify-start h-auto p-2 ${
                       answers[question.id] === option.id
                         ? "bg-brand-amber/20 border-brand-amber text-white"
-                        : "bg-[#1a1a1a] border-brand-amber/30 text-white hover:bg-brand-amber/10"
-                    }`}
+                        : "bg-white/5 border-white/20 text-white hover:bg-white/10"
+                    } transition-all duration-200`}
                   >
                     <div className="flex items-center">
                       <div
-                        className={`flex-shrink-0 w-4 h-4 rounded-full border flex items-center justify-center mr-3 ${
+                        className={`flex-shrink-0 w-3 h-3 rounded-full border flex items-center justify-center mr-2 ${
                           answers[question.id] === option.id
                             ? "border-brand-amber bg-brand-amber/20"
                             : "border-brand-amber/50"
                         }`}
                       >
                         {answers[question.id] === option.id && (
-                          <div className="w-2 h-2 rounded-full bg-brand-amber"></div>
+                          <div className="w-1.5 h-1.5 rounded-full bg-brand-amber"></div>
                         )}
                       </div>
                       {option.flag && (
-                        <span className="mr-2">{option.flag}</span>
+                        <span className="mr-1 text-sm">{option.flag}</span>
                       )}
-                      <span className="text-sm">{option.text}</span>
+                      <span className="text-xs">{option.text}</span>
                     </div>
                   </Button>
                 ))}
@@ -738,140 +747,105 @@ const CriptoUniversityForm: React.FC = () => {
 
     return (
       <div className="min-h-screen w-full bg-black relative text-white">
-        {/* Dark Dotted Grid Background - matching theme */}
-        <div
-          className="absolute inset-0 z-0"
-          style={{
-            background: "#000000",
-            backgroundImage: `
-              radial-gradient(circle, rgba(255, 255, 255, 0.2) 1.5px, transparent 1.5px)
-            `,
-            backgroundSize: "30px 30px",
-            backgroundPosition: "0 0",
-          }}
-        />
+        {/* DarkVeil Background */}
+        <div className="absolute inset-0 z-0">
+          <DarkVeil />
+        </div>
 
-        {/* Gradient Overlays */}
-        <div className="absolute inset-0 z-5 bg-gradient-to-br from-blue-500/5 via-transparent to-amber-500/5" />
-        <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
-
-        <div className="relative z-20 flex justify-center items-center min-h-screen p-6">
+        <div className="relative z-20 flex justify-center items-center min-h-screen p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 max-w-2xl w-full text-center border border-brand-amber/30"
+            className="bg-white/8 backdrop-blur-md rounded-xl p-4 max-w-lg w-full text-center border border-white/20 shadow-2xl shadow-black/50"
           >
             {/* Success Icon */}
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring" }}
-              className="w-16 h-16 bg-brand-amber rounded-full flex items-center justify-center mx-auto mb-6"
+              className="w-12 h-12 bg-brand-amber rounded-full flex items-center justify-center mx-auto mb-3"
             >
-              <span className="text-3xl">✅</span>
+              <span className="text-xl">✅</span>
             </motion.div>
 
-            <h2 className="text-3xl font-oxanium font-bold text-white mb-4">
+            <h2 className="text-xl font-oxanium font-bold text-white mb-3">
               ¡Gracias por registrarte!
             </h2>
 
-            <div className="text-left bg-blue-500/10 border border-blue-400/30 rounded-xl p-6 mb-6">
-              <h3 className="text-xl font-bold text-blue-400 mb-3 font-oxanium">
-                📈 Para activar tu acceso completo:
+            <div className="text-left bg-blue-500/10 border border-blue-400/30 rounded-lg p-3 mb-4">
+              <h3 className="text-sm font-bold text-blue-400 mb-2 font-oxanium">
+                📈 Para activar acceso:
               </h3>
 
-              <div className="space-y-4 text-gray-300 font-electrolize">
-                <p className="text-lg">
-                  <span className="text-white font-semibold">1.</span> Realiza
-                  una inversión mínima de{" "}
+              <div className="space-y-2 text-gray-300 font-electrolize text-xs">
+                <p>
+                  <span className="text-white font-semibold">1.</span> Invierte{" "}
                   <span className="text-brand-amber font-bold">
-                    S/.100 o $30 USD
+                    S/.100 o $30
                   </span>{" "}
-                  en tu propia cuenta de Blofin
+                  en Blofin
                 </p>
-
-                <p className="text-lg">
+                <p>
                   <span className="text-white font-semibold">2.</span> Usa
                   nuestro{" "}
                   <span className="text-brand-amber font-bold">
                     link exclusivo
-                  </span>{" "}
-                  para crear tu cuenta
+                  </span>
                 </p>
-
-                <p className="text-lg">
-                  <span className="text-white font-semibold">3.</span> Envíanos
-                  tu{" "}
+                <p>
+                  <span className="text-white font-semibold">3.</span> Envía{" "}
                   <span className="text-brand-amber font-bold">
                     comprobante
                   </span>{" "}
                   por WhatsApp
                 </p>
               </div>
-
-              <div className="mt-4 p-3 bg-amber-500/10 border border-amber-400/30 rounded-lg">
-                <p className="text-amber-300 text-sm font-electrolize">
-                  💡 <strong>Importante:</strong> La inversión es en tu propia
-                  cuenta, tú mantienes el control total de tus fondos.
-                </p>
-              </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="space-y-4">
-              {/* Blofin Link Button */}
+            <div className="space-y-2">
               <Button
                 asChild
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg py-4 font-electrolize"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm py-2 font-electrolize"
               >
                 <a
                   href="https://partner.blofin.com/d/criptouniversity"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 text-sm md:text-lg"
+                  className="inline-flex items-center justify-center gap-1 text-xs"
                 >
-                  <span>🔗</span>
-                  Crear cuenta en Blofin (Link exclusivo)
-                  <ExternalLink className="w-4 h-4" />
+                  🔗 Crear cuenta Blofin
+                  <ExternalLink className="w-3 h-3" />
                 </a>
               </Button>
 
-              {/* WhatsApp Button */}
               <Button
                 asChild
-                className="w-full bg-brand-amber hover:bg-brand-amber/90 text-black text-lg py-4 font-electrolize font-bold"
+                className="w-full bg-brand-amber hover:bg-brand-amber/90 text-black text-sm py-2 font-electrolize font-bold"
               >
                 <a
                   href={generateWhatsAppLink(whatsappMessage)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 text-sm md:text-lg"
+                  className="inline-flex items-center justify-center gap-1 text-xs"
                 >
-                  <WhatsAppIcon className="w-5 h-5" />
-                  Enviar comprobante por WhatsApp
+                  <WhatsAppIcon className="w-4 h-4" />
+                  Enviar comprobante
                 </a>
               </Button>
             </div>
 
-            {/* Additional Info */}
-            <div className="mt-6 text-sm text-gray-400 font-electrolize">
-              <p>
-                Una vez verificado tu comprobante, recibirás acceso inmediato a:
-              </p>
-              <div className="mt-2 space-y-1 text-left max-w-md mx-auto">
-                <p>• 📚 Curso completo de trading crypto</p>
-                <p>• 💬 Comunidad privada en Discord y Telegram</p>
-                <p>• 📊 Señales diarias de trading</p>
-                <p>• 🎥 Sesiones en vivo semanales</p>
-                <p>• 🤝 Soporte personalizado 24/7</p>
+            <div className="mt-3 text-xs text-gray-400 font-electrolize">
+              <p className="mb-1">Acceso inmediato a:</p>
+              <div className="text-left space-y-0.5">
+                <p>📚 Curso crypto • 💬 Comunidad</p>
+                <p>📊 Señales • 🎥 Sesiones en vivo</p>
               </div>
             </div>
 
-            {/* Back to Home */}
             <Button
               variant="outline"
               onClick={() => (window.location.href = "/")}
-              className="w-full mt-4 border-white/30 text-black hover:bg-white/10 font-electrolize"
+              className="w-full mt-3 border-white/30 text-black hover:bg-white/10 font-electrolize text-xs py-1.5"
             >
               Volver al inicio
             </Button>
@@ -883,22 +857,10 @@ const CriptoUniversityForm: React.FC = () => {
 
   return (
     <div className="min-h-screen w-full bg-black relative text-white">
-      {/* Dark Dotted Grid Background - matching theme */}
-      <div
-        className="absolute inset-0 z-0"
-        style={{
-          background: "#000000",
-          backgroundImage: `
-            radial-gradient(circle, rgba(255, 255, 255, 0.2) 1.5px, transparent 1.5px)
-          `,
-          backgroundSize: "30px 30px",
-          backgroundPosition: "0 0",
-        }}
-      />
-
-      {/* Gradient Overlays */}
-      <div className="absolute inset-0 z-5 bg-gradient-to-br from-blue-500/5 via-transparent to-amber-500/5" />
-      <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
+      {/* DarkVeil Background */}
+      <div className="absolute inset-0 z-0">
+        <DarkVeil />
+      </div>
 
       {/* Main container */}
       <div className="relative z-20 w-full max-w-2xl mx-auto px-6 py-8 flex justify-center items-center min-h-screen">
@@ -913,7 +875,7 @@ const CriptoUniversityForm: React.FC = () => {
               Únete a CriptoUniversity
             </h1>
             <p className="text-gray-300 font-electrolize">
-              La primera universidad cripto gratuita de Latinoamérica
+              La primera universidad cripto 100% gratuita de Latinoamérica
             </p>
           </motion.div>
 

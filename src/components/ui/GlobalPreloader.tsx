@@ -53,7 +53,7 @@ const GlobalPreloader: React.FC<GlobalPreloaderProps> = ({ onComplete }) => {
           transition={{ duration: 2, repeat: Infinity }}
           className="mt-4 text-blue-400 text-lg font-medium tracking-wider uppercase font-oxanium"
         >
-          La primera universidad cripto gratuita
+          La primera universidad cripto 100% gratuita
         </motion.p>
       </div>
     </motion.div>
