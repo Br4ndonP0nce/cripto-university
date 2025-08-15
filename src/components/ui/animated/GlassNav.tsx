@@ -80,6 +80,7 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
   className = "",
   style = {},
 }) => {
+  const [isClient, setIsClient] = useState(false);
   const uniqueId = useId().replace(/:/g, "-");
   const filterId = `glass-filter-${uniqueId}`;
   const redGradId = `red-grad-${uniqueId}`;
@@ -93,6 +94,10 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
   const gaussianBlurRef = useRef<SVGFEGaussianBlurElement>(null);
 
   const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const generateDisplacementMap = () => {
     const rect = containerRef.current?.getBoundingClientRect();
@@ -199,6 +204,10 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
   }, [width, height]);
 
   const supportsSVGFilters = () => {
+    if (typeof window === "undefined" || typeof document === "undefined") {
+      return false;
+    }
+    
     const isWebkit =
       /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
     const isFirefox = /Firefox/.test(navigator.userAgent);
@@ -207,9 +216,13 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
       return false;
     }
 
-    const div = document.createElement("div");
-    div.style.backdropFilter = `url(#${filterId})`;
-    return div.style.backdropFilter !== "";
+    try {
+      const div = document.createElement("div");
+      div.style.backdropFilter = `url(#${filterId})`;
+      return div.style.backdropFilter !== "";
+    } catch {
+      return false;
+    }
   };
 
   const supportsBackdropFilter = () => {
@@ -226,6 +239,18 @@ const GlassSurface: React.FC<GlassSurfaceProps> = ({
       "--glass-frost": backgroundOpacity,
       "--glass-saturation": saturation,
     } as React.CSSProperties;
+
+    // Return safe fallback styles during SSR
+    if (!isClient) {
+      return {
+        ...baseStyles,
+        background: isDarkMode 
+          ? "rgba(0, 0, 0, 0.6)" 
+          : "rgba(255, 255, 255, 0.3)",
+        border: "1px solid rgba(255, 255, 255, 0.2)",
+        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+      };
+    }
 
     const svgSupported = supportsSVGFilters();
     const backdropFilterSupported = supportsBackdropFilter();

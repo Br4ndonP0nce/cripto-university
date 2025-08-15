@@ -3,12 +3,11 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Footer from "@/components/ui/Footer/Footer";
 import { VideoPreloadProvider } from "@/contexts/VideoPreloadContent";
-import Navbar from "@/components/ui/Nav/Nav";
 import ChatBot from "@/components/ui/ChatBot";
 import { ChatBotProvider } from "@/contexts/ChatBotContext";
 import { LenisProvider } from "@/contexts/LenisContext";
 import PreloaderProvider from "@/components/providers/PreloaderProvider";
-
+import Navbar from "@/components/ui/Nav/NavGlassMorph";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
