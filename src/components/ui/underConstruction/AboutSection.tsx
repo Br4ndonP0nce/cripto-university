@@ -23,18 +23,8 @@ const AboutSection: React.FC<AboutSectionProps> = ({
 
   return (
     <div className="min-h-screen w-full bg-black relative overflow-hidden">
-      {/* Dark Dotted Grid Background - matching your theme */}
-      <div
-        className="absolute inset-0 z-0"
-        style={{
-          background: "#141b33",
-          backgroundImage: `
-              radial-gradient(circle, rgba(255, 255, 255, 0.2) 1.5px, transparent 1.5px)
-            `,
-          backgroundSize: "30px 30px",
-          backgroundPosition: "0 0",
-        }}
-      />
+      {/* Dark Background */}
+      <div className="absolute inset-0 z-0 bg-black" />
       <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
       <div className="absolute inset-0 z-5 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
 
@@ -46,9 +36,17 @@ const AboutSection: React.FC<AboutSectionProps> = ({
           transition={{ duration: 0.8, delay: 0.2 }}
           className="lg:hidden w-full text-center mb-8 order-1"
         >
-          <h1 className="text-4xl sm:text-5xl font-oxanium font-bold leading-tight">
-            <span className="text-brand-amber">¿Qué es</span> <br />
-            <span className="text-white">CriptoUniversity?</span>
+          <h1 className="text-4xl sm:text-5xl font-oxanium font-bold leading-tight flex flex-col items-center gap-2">
+            <span className="text-brand-amber">¿Qué es</span>
+            <Image
+              src="/image/Logos/logoWhite.png"
+              alt="CriptoUniversity Logo"
+              width={300}
+              height={120}
+              className="w-auto h-12 sm:h-16 object-contain"
+              priority
+            />
+            <span className="text-white">?</span>
           </h1>
         </motion.div>
 
@@ -189,11 +187,23 @@ const AboutSection: React.FC<AboutSectionProps> = ({
         </div>
       </div>
 
-      {/* Ambient Effects */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse opacity-60" />
+      {/* Enhanced Ambient Effects */}
+      <div className="absolute top-1/6 left-1/6 w-[600px] h-[600px] bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
       <div
-        className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl animate-pulse opacity-60"
+        className="absolute bottom-1/6 right-1/6 w-[600px] h-[600px] bg-amber-500/20 rounded-full blur-3xl animate-pulse"
         style={{ animationDelay: "3s" }}
+      />
+      <div
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-purple-500/10 rounded-full blur-3xl animate-pulse opacity-80"
+        style={{ animationDelay: "1.5s" }}
+      />
+      <div
+        className="absolute top-0 right-0 w-[400px] h-[400px] bg-cyan-500/15 rounded-full blur-3xl animate-pulse opacity-70"
+        style={{ animationDelay: "4s" }}
+      />
+      <div
+        className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-500/12 rounded-full blur-3xl animate-pulse opacity-75"
+        style={{ animationDelay: "2s" }}
       />
     </div>
   );

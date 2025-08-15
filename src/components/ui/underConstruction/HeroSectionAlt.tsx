@@ -62,21 +62,10 @@ const CriptoUniversityHero: React.FC<CriptoUniversityHeroProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.2, ease: [0.23, 1, 0.32, 1] }}
-          className="relative z-20 min-h-[calc(100vh-4rem)] sm:min-h-[calc(100vh-5rem)] md:min-h-screen flex flex-col lg:flex-row items-center justify-center lg:justify-between px-4 sm:px-6 lg:px-12 xl:px-20 py-12 lg:py-15 md:py-0 "
+          className="relative z-20 min-h-[calc(100vh-4rem)] sm:min-h-[calc(100vh-5rem)] md:min-h-screen flex flex-col-reverse lg:flex-row items-center justify-center lg:justify-between px-4 sm:px-6 lg:px-12 xl:px-20 py-12 lg:py-15 md:py-0 "
         >
           {/* Left Content */}
           <div className="flex-1 max-w-3xl space-y-6 sm:space-y-8 lg:pr-12 text-center  lg:text-left md:mt-50 lg:mt-0">
-            {/* Main Headline */}
-            <div className="flex justify-center lg:justify-start mb-4">
-              <Image
-                src="/image/Logos/mainLogo.png"
-                alt="Cripto University Logo"
-                width={500}
-                height={200}
-                className="w-auto  object-contain"
-                priority
-              />
-            </div>
             <h1 className=" font-bold leading-tight font-oxanium">
               <TextType
                 as="span"
@@ -154,59 +143,22 @@ const CriptoUniversityHero: React.FC<CriptoUniversityHeroProps> = ({
             </div>
           </div>
 
-          {/* Right Side - Founder + Stats */}
-          <div className="flex-1 max-w-lg space-y-4 sm:space-y-6 lg:space-y-8 mt-4 sm:mt-6 lg:mt-0 font-electrolize">
-            {/* Founder Image */}
-
-            {/* Live Stats */}
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              {[
-                {
-                  number: `${stats.activeStudents}+`,
-                  label: "Estudiantes Activos",
-                  color: "white",
-                },
-                {
-                  number: `${stats.videoHours}h`,
-                  label: "Contenido en Video",
-                  color: "white",
-                },
-                {
-                  number: `${stats.dailySignals}`,
-                  label: "Señales Diarias",
-                  color: "white",
-                },
-                {
-                  number: stats.teachers,
-                  label: "Maestros en trading",
-                  color: "white",
-                },
-              ].map((stat, i) => (
-                <div
-                  key={i}
-                  className={`bg-white/5 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/60 hover:border-${stat.color}-400/40 transition-all duration-300 text-center`}
-                >
-                  <div className={`text-xl sm:text-2xl font-bold text-white`}>
-                    {stat.number}
-                  </div>
-                  <div className="text-xs text-white mt-1">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Powered by Blofin */}
+          {/* Right Side - Logo Shield */}
+          <div className="flex-1 max-w-lg flex items-center justify-center mt-4 sm:mt-6 lg:mt-0">
             <motion.div
-              className="text-center p-3 sm:p-4 bg-gradient-to-r from-slate-800/50 to-slate-700/50 rounded-xl border border-slate-600/30 cursor-pointer"
-              onClick={handleBlofinClick}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.5 }}
+              className="relative"
             >
-              <p className="text-gray-400 text-sm mb-2">Powered by</p>
-              <p className="text-blue-400 font-bold text-lg">Blofin</p>
-              <p className="text-xs text-gray-500">
-                Plataforma de trading profesional
-              </p>
-              <p className="text-xs text-blue-400 mt-1">¿Qué es esto? →</p>
+              <Image
+                src="/image/Logos/LogoShield.png"
+                alt="Cripto University Shield Logo"
+                width={400}
+                height={400}
+                className="w-auto h-auto max-w-[300px] sm:max-w-[400px] lg:max-w-[500px] object-contain"
+                priority
+              />
             </motion.div>
           </div>
         </motion.div>

@@ -103,25 +103,25 @@ const BenefitCard = ({ benefit }: { benefit: Benefit }) => {
       transition={{ duration: 0.6 }}
       className="relative"
     >
-      <div className="relative z-10 py-8">
+      <div className="relative z-10 py-8 px-6 bg-white/8 backdrop-blur-md rounded-2xl border border-white/20 hover:border-white/30 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/10">
         <div className="space-y-6">
           <div className="flex items-center space-x-4">
-            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/20">
-              <span className="text-sm lg:text-lg font-bold text-white">
+            <div className="w-12 h-12 lg:w-16 lg:h-16 bg-gradient-to-br from-purple-500/20 to-blue-500/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30 shadow-lg">
+              <span className="text-sm lg:text-xl font-bold text-white">
                 {String(benefit.id).padStart(2, "0")}
               </span>
             </div>
-            <div className="h-px bg-gradient-to-r from-white/30 to-transparent flex-1" />
+            <div className="h-px bg-gradient-to-r from-brand-amber/50 via-white/30 to-transparent flex-1" />
           </div>
 
-          <p className="text-base lg:text-lg text-gray-300 leading-relaxed font-light">
+          <p className="text-base lg:text-lg text-gray-200 leading-relaxed font-light">
             {benefit.description}
           </p>
 
           <Link href="/join" className="">
-            <div className="flex items-center space-x-2 text-sm text-gray-400 hover:scale-102 hover:text-white/90 duration-300 font-aleo">
-              <div className="w-2 h-2 rounded-full bg-white/60" />
-              <span>Unete gratis!</span>
+            <div className="flex items-center space-x-2 text-sm text-gray-300 hover:scale-105 hover:text-brand-amber transition-all duration-300 font-aleo">
+              <div className="w-2 h-2 rounded-full bg-brand-amber/80" />
+              <span>Únete gratis!</span>
             </div>
           </Link>
         </div>
@@ -155,54 +155,39 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
       className="w-full bg-black relative overflow-hidden"
       ref={containerRef}
     >
-      {/* Updated background for #141b33 */}
+      {/* Dark Background */}
+      <div className="absolute inset-0 z-0 bg-black" />
+
+      {/* Subtle Gradient Overlays */}
+      <div className="absolute inset-0 z-5 bg-gradient-to-br from-blue-500/8 via-transparent to-amber-500/8" />
+      <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/30 via-transparent to-black/20" />
+
+      {/* Enhanced Ambient Effects Galaxy */}
+      <div className="absolute top-1/6 left-1/6 w-[700px] h-[700px] bg-blue-500/25 rounded-full blur-3xl animate-pulse" />
       <div
-        className="absolute inset-0 z-0"
-        style={{
-          background: "#141b33",
-          backgroundImage: `
-            radial-gradient(circle, rgba(255, 255, 255, 0.15) 1.5px, transparent 1.5px)
-          `,
-          backgroundSize: "30px 30px",
-          backgroundPosition: "0 0",
-        }}
-      />
-
-      {/* Enhanced Visible Gradient Overlays for #141b33 Background */}
-      {/* Focused top darkening - radial from top center to avoid corner darkening */}
-      <div className="absolute inset-0 z-5 bg-gradient-to-b from-black/60 from-0% via-black/20 via-30% to-transparent to-60%" />
-
-      {/* Additional top center focus - radial gradient */}
-      <div
-        className="absolute top-0 left-1/2 transform -translate-x-1/2 w-full h-96 z-10 bg-gradient-radial from-black/40 via-black/10 to-transparent opacity-80"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 100% at center top, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 40%, transparent 70%)",
-        }}
-      />
-
-      {/* Strong bottom darkening overlay - MIRRORED */}
-      <div className="absolute inset-0 z-5 bg-gradient-to-b from-transparent via-transparent to-black/60" />
-
-      {/* Primary blue-amber accent gradient - more visible */}
-      <div className="absolute inset-0 z-10 bg-gradient-to-br from-blue-500/15 via-transparent to-amber-500/15" />
-
-      {/* Side darkening for containment */}
-      <div className="absolute inset-0 z-10 bg-gradient-to-r from-black/30 via-transparent to-black/30" />
-
-      {/* Additional depth layers */}
-
-      {/* Enhanced Ambient Light Effects - More visible on #141b33 */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl animate-pulse opacity-70" />
-      <div
-        className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-500/20 rounded-full blur-3xl animate-pulse opacity-70"
+        className="absolute bottom-1/6 right-1/6 w-[700px] h-[700px] bg-amber-500/25 rounded-full blur-3xl animate-pulse"
         style={{ animationDelay: "3s" }}
       />
-
-      {/* Central ambient glow - more prominent */}
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-blue-500/8 to-amber-500/8 rounded-full blur-3xl opacity-60" />
-
-      {/* Additional corner darkening for dramatic effect */}
+      <div
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] bg-purple-500/20 rounded-full blur-3xl animate-pulse opacity-80"
+        style={{ animationDelay: "1.5s" }}
+      />
+      <div
+        className="absolute top-0 right-0 w-[600px] h-[600px] bg-cyan-500/18 rounded-full blur-3xl animate-pulse opacity-70"
+        style={{ animationDelay: "4s" }}
+      />
+      <div
+        className="absolute bottom-0 left-0 w-[650px] h-[650px] bg-emerald-500/15 rounded-full blur-3xl animate-pulse opacity-75"
+        style={{ animationDelay: "2s" }}
+      />
+      <div
+        className="absolute top-1/3 right-1/3 w-[500px] h-[500px] bg-rose-500/12 rounded-full blur-3xl animate-pulse opacity-65"
+        style={{ animationDelay: "5s" }}
+      />
+      <div
+        className="absolute bottom-1/3 left-1/3 w-[800px] h-[400px] bg-indigo-500/20 rounded-full blur-3xl animate-pulse opacity-70"
+        style={{ animationDelay: "2.5s" }}
+      />
 
       <div className="relative z-20 max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
         <motion.div
@@ -226,9 +211,9 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
           <div key={index} className="flex justify-start pt-10 md:gap-10">
             <div className="sticky flex flex-col md:flex-row z-40 items-center top-40 self-start max-w-xs lg:max-w-sm md:w-full">
               {/* Timeline dot with icon */}
-              <div className="h-12 w-12 lg:h-14 lg:w-14 absolute left-3 md:left-3 rounded-full bg-black border-2 border-white/20 flex items-center justify-center backdrop-blur-sm">
-                <div className="h-8 w-8 lg:h-10 lg:w-10 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
-                  <item.benefit.icon className="h-4 w-4 lg:h-5 lg:w-5 text-white" />
+              <div className="h-14 w-14 lg:h-16 lg:w-16 absolute left-3 md:left-3 rounded-full bg-gradient-to-br from-purple-500/30 to-blue-500/30 border-2 border-white/30 flex items-center justify-center backdrop-blur-sm shadow-lg shadow-purple-500/20">
+                <div className="h-10 w-10 lg:h-12 lg:w-12 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                  <item.benefit.icon className="h-5 w-5 lg:h-6 lg:w-6 text-white" />
                 </div>
               </div>
 
@@ -255,14 +240,14 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
           style={{
             height: height + "px",
           }}
-          className="absolute md:left-8 left-8 top-0 overflow-hidden w-[2px] bg-[linear-gradient(to_bottom,var(--tw-gradient-stops))] from-transparent from-[0%] via-gray-700 to-transparent to-[99%] [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)]"
+          className="absolute md:left-8 left-8 top-0 overflow-hidden w-[3px] bg-[linear-gradient(to_bottom,var(--tw-gradient-stops))] from-transparent from-[0%] via-gray-600 to-transparent to-[99%] [mask-image:linear-gradient(to_bottom,transparent_0%,black_10%,black_90%,transparent_100%)] shadow-lg"
         >
           <motion.div
             style={{
               height: heightTransform,
               opacity: opacityTransform,
             }}
-            className="absolute inset-x-0 top-0 w-[2px] bg-gradient-to-t from-purple-500 via-blue-500 to-cyan-400 from-[0%] via-[50%] rounded-full"
+            className="absolute inset-x-0 top-0 w-[3px] bg-gradient-to-t from-purple-500 via-blue-500 to-cyan-400 from-[0%] via-[50%] rounded-full shadow-lg shadow-purple-500/50"
           />
         </div>
 
