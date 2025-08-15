@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { name: "Nosotros", href: "#" },
-  { name: "Join", href: "/join" },
+  { name: "Únete", href: "/join" },
 ];
 
 interface NavbarProps {
