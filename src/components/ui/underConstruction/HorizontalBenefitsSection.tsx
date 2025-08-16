@@ -189,12 +189,12 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
         style={{ animationDelay: "2.5s" }}
       />
 
-      <div className="relative z-20 max-w-7xl mx-auto py-20 px-4 md:px-8 lg:px-10">
+      <div className="relative z-20 max-w-7xl mx-auto pt-12 md:pt-16 px-4 md:px-8 lg:px-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center lg:text-left space-y-4 mb-16"
+          className="text-center lg:text-left space-y-4 mb-8 md:mb-12"
         >
           <h2 className="text-4xl sm:text-5xl lg:text-6xl font-oxanium font-bold text-brand-amber leading-tight">
             Beneficios <span className="text-white bg-clip-text ">Únicos</span>
