@@ -38,16 +38,7 @@ const AboutSection: React.FC<AboutSectionProps> = ({
         >
           <h1 className="text-4xl sm:text-5xl font-oxanium font-bold leading-tight flex flex-col items-center gap-2">
             <span className="text-brand-amber">¿Qué es</span>
-            <div className="flex flex-row items-center justify">
-              <Image
-                src="/image/Logos/logoWhite2.png"
-                alt="CriptoUniversity Logo"
-                width={300}
-                height={120}
-                className="w-auto h-12 sm:h-16 object-contain"
-                priority
-              />
-            </div>
+            <span className="text-white">CriptoUniversity?</span>
           </h1>
         </motion.div>
 

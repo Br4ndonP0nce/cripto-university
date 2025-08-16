@@ -81,7 +81,7 @@ const Footer: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center">
                 <Image
-                  src="/image/Logos/navLogo.png"
+                  src="/image/Logos/logoWhite2.png"
                   alt="Cripto University Logo"
                   width={180}
                   height={60}
