@@ -152,7 +152,7 @@ export const Timeline = ({ data }: { data: TimelineEntry[] }) => {
 
   return (
     <div
-      className="w-full bg-black relative overflow-hidden"
+      className="w-full bg-black relative overflow-hidden border-t border-white/10"
       ref={containerRef}
     >
       {/* Dark Background */}

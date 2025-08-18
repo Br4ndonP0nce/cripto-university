@@ -29,7 +29,7 @@ const AboutSection: React.FC<AboutSectionProps> = ({
     });
   };
   return (
-    <div className="min-h-screen w-full bg-black relative overflow-hidden">
+    <div className="min-h-screen w-full bg-black relative overflow-hidden border-t border-white/10">
       {/* Dark Background */}
       <div className="absolute inset-0 z-0 bg-black" />
       <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
