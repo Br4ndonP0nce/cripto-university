@@ -72,18 +72,29 @@ const CriptoUniversityHero: React.FC<CriptoUniversityHeroProps> = ({
                 text="La primera universidad cripto 100% gratuita"
                 typingSpeed={35}
                 showCursor={true}
-                className="text-white text-3xl  md:text-4xl"
+                className="text-white text-3xl md:text-6xl"
                 loop={false}
               />
             </h1>
 
             {/* Value Proposition */}
-            <p className="text-lg sm:text-xl md:text-2xl text-gray-300 leading-relaxed font-aleo">
-              Aprende, invierte y crece con los mejores.{" "}
-              <span className="text-brand-amber font-semibold">
-                Cursos gratuitos + comunidad privada + señales diarias
-              </span>
-            </p>
+
+            <div>
+              <p className="text-lg sm:text-xl md:text-2xl text-gray-300 leading-relaxed font-aleo">
+                Estamos aquí porque alguien tenía que decir basta.{" "}
+                <span className="text-brand-amber font-bold">
+                  Basta de humo,{" "}
+                </span>
+                de cursos carísimos y de mentores que nunca invirtieron un
+                dólar.
+              </p>
+              <p className="text-lg sm:text-xl md:text-2xl text-gray-300 leading-relaxed font-aleo">
+                Aprende, invierte y crece con los mejores.{" "}
+                <span className="text-brand-amber font-semibold">
+                  Cursos gratuitos + comunidad privada + señales diarias
+                </span>
+              </p>
+            </div>
 
             {/* CTA Section */}
             <div className="space-y-6">
@@ -152,7 +163,7 @@ const CriptoUniversityHero: React.FC<CriptoUniversityHeroProps> = ({
               className="relative"
             >
               <Image
-                src="/image/Logos/LogoShield.png"
+                src="/image/Logos/LogoShieldFinal.png"
                 alt="Cripto University Shield Logo"
                 width={400}
                 height={400}

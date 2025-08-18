@@ -66,18 +66,21 @@ export const LenisProvider = ({
   // Memoize the Lenis options to prevent unnecessary re-initializations
   const lenisOptions = useMemo(
     () => ({
-      duration: 1.2,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: "vertical" as const, // Use 'orientation' instead of 'direction'
-      gestureOrientation: "vertical" as const, // Use 'gestureOrientation' instead of 'gestureDirection'
+      duration: 1, // Increased for longer, more fluid scrolling
+      easing: (t: number) => {
+        // Custom easing for more "swingy" effect - ease-out-quart
+        return 1 - Math.pow(1 - t, 3);
+      },
+      orientation: "vertical" as const,
+      gestureOrientation: "vertical" as const,
       smooth: true,
-      mouseMultiplier: 1,
+      wheelMultiplier: 3, // Reduced for smoother mouse wheel response
       smoothTouch: false,
-      touchMultiplier: 2,
+      touchMultiplier: 1.5, // Slightly reduced for better touch control
       infinite: false,
-      syncTouch: false, // Better performance for touch devices
-      syncTouchLerp: 0.075,
-      touchInertiaMultiplier: 35,
+      syncTouch: false,
+      syncTouchLerp: 0.1, // Increased for smoother lerp
+      touchInertiaMultiplier: 25, // Reduced for less aggressive inertia
       wheelEventsTarget: typeof window !== "undefined" ? window : undefined,
       ...options, // Allow overriding defaults
     }),
