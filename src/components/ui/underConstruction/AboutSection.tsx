@@ -7,7 +7,7 @@ import Link from "next/link";
 import { ExternalLink, MapPin, Award, TrendingUp } from "lucide-react";
 import BlurText from "../animated/BlurText";
 import StarBorder from "@/components/animated/starBorder";
-
+import { useLenis } from "@/contexts/LenisContext";
 interface AboutSectionProps {
   founderImageSrc?: string;
   onContactClick?: () => void;
@@ -15,12 +15,19 @@ interface AboutSectionProps {
 }
 
 const AboutSection: React.FC<AboutSectionProps> = ({
-  founderImageSrc = "/image/Team/Santiago.jpg",
+  founderImageSrc = "/image/Team/SantiagoBW.jpg",
   onContactClick,
   onFollowClick,
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const { scrollTo } = useLenis();
 
+  const handleScrollToFAQ = () => {
+    scrollTo("#FAQ", {
+      offset: -100, // Adjust offset as needed
+      duration: 1.5, // Smooth scroll duration
+    });
+  };
   return (
     <div className="min-h-screen w-full bg-black relative overflow-hidden">
       {/* Dark Background */}
@@ -131,18 +138,89 @@ const AboutSection: React.FC<AboutSectionProps> = ({
             </h1>
           </motion.div>
 
-          {/* Description */}
+          {/* Story Content */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
+            className="space-y-6"
           >
-            <p className="text-lg sm:text-xl md:text-2xl text-gray-300 leading-relaxed font-aleo">
-              La primera universidad cripto gratuita fundada por Santiago
-              Chávez, reconocido influencer con años de trayectoria en el mundo
-              crypto y empresarial. Aprende trading, únete a nuestra comunidad y
-              recibe señales diarias.
+            {/* Opening Hook */}
+            <div className="text-center lg:text-left">
+              <p className="text-xl sm:text-2xl md:text-3xl text-brand-amber font-bold leading-tight font-oxanium">
+                CriptoUniversity no nació como un negocio.
+              </p>
+              <p className="text-xl sm:text-2xl md:text-3xl text-white font-bold leading-tight font-oxanium">
+                Nació como una reacción.
+              </p>
+            </div>
+
+            {/* Problem Statement */}
+            <p className="text-base sm:text-lg text-gray-300 leading-relaxed font-aleo">
+              Una reacción al humo. A los cursos de $500 que no enseñan nada. A
+              los "mentores" que nunca han invertido su propio dinero. A la
+              desinformación que inunda redes y aleja a la gente de un mundo que
+              sí puede cambiar vidas: el de las criptomonedas.
             </p>
+
+            {/* Personal Introduction */}
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-brand-amber/20 italic">
+              <p className="text-base sm:text-lg text-gray-200 leading-relaxed font-aleo">
+                <span className="text-brand-amber font-semibold ">
+                  Yo soy Santiago Chávez Irus
+                </span>
+                , creador de contenido, emprendedor y el primer referente cripto
+                en Perú. En redes me encuentras como{" "}
+                <span className="text-brand-amber underline font-bold">
+                  <a
+                    href="https://www.tiktok.com/@santiagochavezirus"
+                    rel="noreferrer"
+                    target="_blank"
+                  >
+                    @santiagochavezirus
+                  </a>
+                </span>
+                , donde he construido una comunidad de más de{" "}
+                <span className="text-brand-amber font-semibold">
+                  3 millones de personas
+                </span>{" "}
+                entre TikTok, Instagram y YouTube.
+              </p>
+            </div>
+
+            {/* Mission */}
+            <p className="text-base sm:text-lg text-gray-300 leading-relaxed font-aleo">
+              Empecé creando contenido porque vi cuánta desinformación había
+              allá afuera. Porque yo también estuve perdido al principio. Y
+              porque supe que, si alguien explicaba bien cómo funciona esto,
+              podía cambiar vidas.
+            </p>
+
+            {/* What CriptoUniversity Is */}
+            <div className="border-l-4 border-brand-amber pl-4 sm:pl-6">
+              <p className="text-base sm:text-lg text-gray-200 leading-relaxed font-aleo">
+                <span className="text-brand-amber font-semibold">
+                  CriptoUniversity
+                </span>{" "}
+                es una plataforma 100% gratuita para enseñar a invertir desde
+                cero. Con cursos por módulos, señales diarias, entrevistas
+                exclusivas, sesiones en vivo, acceso a grupos privados y
+                herramientas reales para avanzar.
+              </p>
+            </div>
+
+            {/* Call to Movement */}
+            <div className="text-center lg:text-left italic">
+              <p className="text-lg sm:text-xl text-white font-semibold font-oxanium mb-2">
+                Esta no es una promesa vacía.
+              </p>
+              <p className="text-lg sm:text-xl text-brand-amber font-semibold font-oxanium mb-2">
+                Es un movimiento.
+              </p>
+              <p className="text-base sm:text-lg text-gray-300 font-aleo">
+                Y tú puedes ser parte de él.
+              </p>
+            </div>
           </motion.div>
 
           {/* CTA Section */}
@@ -152,7 +230,7 @@ const AboutSection: React.FC<AboutSectionProps> = ({
             transition={{ duration: 0.8, delay: 1.2 }}
             className="space-y-4"
           >
-            <div className="flex justify-center lg:justify-start">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center lg:justify-start">
               <Link href="/join">
                 <StarBorder
                   as="div"
@@ -169,6 +247,22 @@ const AboutSection: React.FC<AboutSectionProps> = ({
                   </motion.button>
                 </StarBorder>
               </Link>
+
+              <StarBorder
+                as="div"
+                className="inline-block"
+                color="gold"
+                speed="5s"
+              >
+                <motion.button
+                  onClick={handleScrollToFAQ}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className=" text-lg font-semibold rounded-2xl font-aleo "
+                >
+                  Más Información →
+                </motion.button>
+              </StarBorder>
             </div>
 
             {/* Trust Indicator */}

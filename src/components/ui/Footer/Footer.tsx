@@ -25,20 +25,17 @@ const Footer: React.FC = () => {
       { name: "Cursos Gratuitos", href: "#" },
       { name: "Comunidad", href: "#" },
       { name: "Señales Trading", href: "#" },
-      { name: "Únete Ahora", href: "#" },
+      { name: "Únete Ahora", href: "/join" },
     ],
     resources: [
-      { name: "Blog Cripto", href: "#" },
-      { name: "Tutoriales", href: "#" },
-      { name: "FAQ", href: "#" },
-      { name: "Soporte", href: "#" },
+      { name: "Blog Cripto", href: "https://www.criptonoticias.com/" },
+      {
+        name: "Tutoriales",
+        href: "https://www.criptonoticias.com/categorias/tutoriales-guias/",
+      },
+      { name: "FAQ", href: "#FAQ" },
     ],
-    legal: [
-      { name: "Términos y Condiciones", href: "#" },
-      { name: "Política de Privacidad", href: "#" },
-      { name: "Disclaimer Legal", href: "#" },
-      { name: "Contacto", href: "#" },
-    ],
+    legal: [{ name: "Términos y Condiciones", href: "/disclaimer" }],
   };
 
   const socialLinks = [
