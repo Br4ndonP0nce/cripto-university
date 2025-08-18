@@ -33,7 +33,10 @@ const FAQSection = () => {
   ];
 
   return (
-    <div className=" w-full bg-black relative overflow-hidden" id="FAQ">
+    <div
+      className=" w-full bg-black relative overflow-hidden border-t border-white/10"
+      id="FAQ"
+    >
       {/* Dark Background */}
 
       <div className="relative z-20  flex flex-col items-center justify-center px-4 sm:px-6 lg:px-12 xl:px-20 py-16">
