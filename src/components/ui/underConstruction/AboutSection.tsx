@@ -273,6 +273,192 @@ const AboutSection: React.FC<AboutSectionProps> = ({
         </div>
       </div>
 
+      {/* Creators Section */}
+      <div className="relative z-20 py-20 px-4 sm:px-6 lg:px-12 xl:px-20">
+        {/* Section Title */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-oxanium font-bold text-white mb-4">
+            <span className="text-brand-amber">🌎</span> Nuestros Creadores y Líderes
+          </h2>
+          <div className="w-32 h-1 bg-brand-amber mx-auto rounded-full" />
+        </motion.div>
+
+        {/* First Creator Row - Card then Text */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.4 }}
+          className="flex flex-col lg:flex-row items-center gap-12 mb-20"
+        >
+          {/* Crypto Lucho Card */}
+          <div className="flex-1 max-w-lg">
+            <motion.div
+              className="bg-white/5 backdrop-blur-sm rounded-3xl shadow-lg shadow-black/20 overflow-hidden transition-all duration-700 hover:scale-[1.02]"
+              whileHover={{ y: -5 }}
+            >
+              {/* Profile Image */}
+              <div className="relative overflow-hidden">
+                <motion.div
+                  className="aspect-square relative overflow-hidden"
+                  whileHover={{ scale: 1.03 }}
+                  transition={{ duration: 0.7 }}
+                >
+                  <Image
+                    src="/image/Team/lucho.jpg"
+                    alt="Crypto Lucho"
+                    fill
+                    className="object-cover transition-transform duration-700"
+                    priority
+                  />
+                  <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute top-6 left-6">
+                    <h3 className="text-2xl font-oxanium font-bold text-white drop-shadow-lg">
+                      Crypto Lucho
+                    </h3>
+                    <p className="text-brand-amber font-electrolize">
+                      Líder Regional
+                    </p>
+                  </div>
+                  <div className="absolute top-6 right-6">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-2">
+                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+                      <span className="text-xs text-white font-medium">Dubái</span>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Profile Footer */}
+              <div className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-white/20 transition-all duration-500 hover:scale-110 bg-gradient-to-br from-brand-amber/50 to-purple-600/50 flex items-center justify-center">
+                    <span className="text-xs">🇦🇷</span>
+                  </div>
+                  <motion.div className="transition-transform duration-500 hover:translate-x-1">
+                    <div className="text-sm text-white font-electrolize">
+                      @cryptoluchobtc
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      91K+ IG • 2.8M+ TikTok
+                    </div>
+                  </motion.div>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-brand-amber text-black rounded-lg px-4 py-2 text-sm font-medium font-electrolize
+                           transition-all duration-500 hover:bg-brand-amber/90 hover:shadow-lg"
+                >
+                  + Seguir
+                </motion.button>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Crypto Lucho Description */}
+          <div className="flex-1 space-y-6">
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-brand-amber/20">
+              <p className="text-lg text-gray-200 leading-relaxed font-aleo">
+                Con más de <span className="text-brand-amber font-semibold">91,000 seguidores en Instagram</span> y <span className="text-brand-amber font-semibold">2.8 millones en TikTok</span>, Crypto Lucho es uno de los creadores cripto más influyentes de Latinoamérica.
+              </p>
+            </div>
+            <p className="text-base text-gray-300 leading-relaxed font-aleo">
+              Desde Dubái, comparte contenido educativo y estratégico sobre Bitcoin, inversiones y tendencias del mercado. Forma parte del equipo fundador de CriptoUniversity como <span className="text-brand-amber font-semibold">líder regional</span>, ayudando a democratizar la educación financiera en español con su comunidad masiva y su visión global.
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Second Creator Row - Text then Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.6 }}
+          className="flex flex-col lg:flex-row-reverse items-center gap-12"
+        >
+          {/* Crypto Juancho Card */}
+          <div className="flex-1 max-w-lg">
+            <motion.div
+              className="bg-white/5 backdrop-blur-sm rounded-3xl shadow-lg shadow-black/20 overflow-hidden transition-all duration-700 hover:scale-[1.02]"
+              whileHover={{ y: -5 }}
+            >
+              {/* Profile Image */}
+              <div className="relative overflow-hidden">
+                <motion.div
+                  className="aspect-square relative overflow-hidden"
+                  whileHover={{ scale: 1.03 }}
+                  transition={{ duration: 0.7 }}
+                >
+                  <Image
+                    src="/image/Team/juancho.jpg"
+                    alt="Crypto Juancho"
+                    fill
+                    className="object-cover transition-transform duration-700"
+                    priority
+                  />
+                  <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/60 to-transparent" />
+                  <div className="absolute top-6 left-6">
+                    <h3 className="text-2xl font-oxanium font-bold text-white drop-shadow-lg">
+                      Crypto Juancho
+                    </h3>
+                    <p className="text-brand-amber font-electrolize">
+                      Mentor & Guía
+                    </p>
+                  </div>
+                  <div className="absolute top-6 right-6">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-2">
+                      <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                      <span className="text-xs text-white font-medium">Perú</span>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Profile Footer */}
+              <div className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-white/20 transition-all duration-500 hover:scale-110 bg-gradient-to-br from-green-500/50 to-brand-amber/50 flex items-center justify-center">
+                    <span className="text-xs">🇵🇪</span>
+                  </div>
+                  <motion.div className="transition-transform duration-500 hover:translate-x-1">
+                    <div className="text-sm text-white font-electrolize">
+                      @cryptojuanchos
+                    </div>
+                    <div className="text-xs text-gray-400">
+                      1M+ TikTok • 17K+ IG
+                    </div>
+                  </motion.div>
+                </div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="bg-brand-amber text-black rounded-lg px-4 py-2 text-sm font-medium font-electrolize
+                           transition-all duration-500 hover:bg-brand-amber/90 hover:shadow-lg"
+                >
+                  + Seguir
+                </motion.button>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Crypto Juancho Description */}
+          <div className="flex-1 space-y-6">
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-brand-amber/20">
+              <p className="text-lg text-gray-200 leading-relaxed font-aleo">
+                Con más de <span className="text-brand-amber font-semibold">1 millón de seguidores en TikTok</span> y <span className="text-brand-amber font-semibold">17,000 en Instagram</span>, Crypto Juancho es uno de los referentes cripto más potentes de Perú.
+              </p>
+            </div>
+            <p className="text-base text-gray-300 leading-relaxed font-aleo">
+              Con un estilo directo y práctico, enseña cómo generar ingresos con criptomonedas a miles de personas, y ha liderado academias con cientos de alumnos. Ahora es parte del núcleo de CriptoUniversity, como <span className="text-brand-amber font-semibold">mentor y guía</span>, comprometido con formar una nueva generación de inversores en toda la región.
+            </p>
+          </div>
+        </motion.div>
+      </div>
+
       {/* Enhanced Ambient Effects */}
       <div className="absolute top-1/6 left-1/6 w-[600px] h-[600px] bg-blue-500/20 rounded-full blur-3xl animate-pulse" />
       <div
