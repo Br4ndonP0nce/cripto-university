@@ -35,7 +35,7 @@ const AboutSection: React.FC<AboutSectionProps> = ({
       <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
       <div className="absolute inset-0 z-5 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
 
-      <div className="relative z-20 min-h-screen flex flex-col lg:flex-row items-center justify-center lg:justify-between px-4 sm:px-6 lg:px-12 xl:px-20 py-5 ">
+      <div className="relative z-20 min-h-screen flex flex-col lg:flex-row lg:gap-20 items-center justify-center  px-4 sm:px-6 lg:px-12 xl:px-20 py-5 ">
         {/* Mobile Title - Shows first on mobile */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -132,7 +132,7 @@ const AboutSection: React.FC<AboutSectionProps> = ({
             transition={{ duration: 0.8, delay: 0.6 }}
             className="space-y-4 hidden lg:block"
           >
-            <h1 className="text-5xl lg:text-7xl font-oxanium font-bold leading-tight">
+            <h1 className="text-3xl lg:text-5xl font-oxanium font-bold leading-tight">
               <span className="text-brand-amber">¿Qué es</span> <br />
               <span className="text-white">CriptoUniversity?</span>
             </h1>
@@ -143,20 +143,20 @@ const AboutSection: React.FC<AboutSectionProps> = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="space-y-6"
+            className="space-y-4"
           >
             {/* Opening Hook */}
             <div className="text-center lg:text-left">
-              <p className="text-xl sm:text-2xl md:text-3xl text-brand-amber font-bold leading-tight font-oxanium">
+              <p className="text-xl  md:text-2xl text-brand-amber font-bold leading-tight font-oxanium">
                 CriptoUniversity no nació como un negocio.
               </p>
-              <p className="text-xl sm:text-2xl md:text-3xl text-white font-bold leading-tight font-oxanium">
+              <p className="text-xl  md:text-2xl text-white font-bold leading-tight font-oxanium">
                 Nació como una reacción.
               </p>
             </div>
 
             {/* Problem Statement */}
-            <p className="text-base sm:text-lg text-gray-300 leading-relaxed font-aleo">
+            <p className="text-base text-md md:text-lg text-gray-300 leading-relaxed font-aleo">
               Una reacción al humo. A los cursos de $500 que no enseñan nada. A
               los "mentores" que nunca han invertido su propio dinero. A la
               desinformación que inunda redes y aleja a la gente de un mundo que
@@ -165,7 +165,7 @@ const AboutSection: React.FC<AboutSectionProps> = ({
 
             {/* Personal Introduction */}
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-brand-amber/20 italic">
-              <p className="text-base sm:text-lg text-gray-200 leading-relaxed font-aleo">
+              <p className="text-base text-md md:text-lg text-gray-200 leading-relaxed font-aleo">
                 <span className="text-brand-amber font-semibold ">
                   Yo soy Santiago Chávez Irus
                 </span>
@@ -187,14 +187,6 @@ const AboutSection: React.FC<AboutSectionProps> = ({
                 entre TikTok, Instagram y YouTube.
               </p>
             </div>
-
-            {/* Mission */}
-            <p className="text-base sm:text-lg text-gray-300 leading-relaxed font-aleo">
-              Empecé creando contenido porque vi cuánta desinformación había
-              allá afuera. Porque yo también estuve perdido al principio. Y
-              porque supe que, si alguien explicaba bien cómo funciona esto,
-              podía cambiar vidas.
-            </p>
 
             {/* What CriptoUniversity Is */}
             <div className="border-l-4 border-brand-amber pl-4 sm:pl-6">
@@ -274,16 +266,17 @@ const AboutSection: React.FC<AboutSectionProps> = ({
       </div>
 
       {/* Creators Section */}
-      <div className="relative z-20 py-20 px-4 sm:px-6 lg:px-12 xl:px-20">
+      <div className="relative z-20 py-12 px-4 sm:px-6 lg:px-12 xl:px-20">
         {/* Section Title */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-center mb-16"
+          className="text-center mb-10"
         >
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-oxanium font-bold text-white mb-4">
-            <span className="text-brand-amber">🌎</span> Nuestros Creadores y Líderes
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-oxanium font-bold text-white mb-4">
+            <span className="text-brand-amber">🌎</span> Nuestros Creadores y
+            Líderes
           </h2>
           <div className="w-32 h-1 bg-brand-amber mx-auto rounded-full" />
         </motion.div>
@@ -293,10 +286,10 @@ const AboutSection: React.FC<AboutSectionProps> = ({
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
-          className="flex flex-col lg:flex-row items-center gap-12 mb-20"
+          className="flex flex-col lg:flex-row lg:gap-12 gap-5 items-center justify-center px-4 sm:px-6 lg:px-12 xl:px-20 py-3"
         >
           {/* Crypto Lucho Card */}
-          <div className="flex-1 max-w-lg">
+          <div className="flex-1 max-w-xs lg:max-w-sm">
             <motion.div
               className="bg-white/5 backdrop-blur-sm rounded-3xl shadow-lg shadow-black/20 overflow-hidden transition-all duration-700 hover:scale-[1.02]"
               whileHover={{ y: -5 }}
@@ -316,19 +309,10 @@ const AboutSection: React.FC<AboutSectionProps> = ({
                     priority
                   />
                   <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="absolute top-6 left-6">
-                    <h3 className="text-2xl font-oxanium font-bold text-white drop-shadow-lg">
+                  <div className="absolute top-4 left-4">
+                    <h3 className="text-xl font-oxanium font-bold text-white drop-shadow-lg">
                       Crypto Lucho
                     </h3>
-                    <p className="text-brand-amber font-electrolize">
-                      Líder Regional
-                    </p>
-                  </div>
-                  <div className="absolute top-6 right-6">
-                    <div className="bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-2">
-                      <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-                      <span className="text-xs text-white font-medium">Dubái</span>
-                    </div>
                   </div>
                 </motion.div>
               </div>
@@ -364,11 +348,27 @@ const AboutSection: React.FC<AboutSectionProps> = ({
           <div className="flex-1 space-y-6">
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-brand-amber/20">
               <p className="text-lg text-gray-200 leading-relaxed font-aleo">
-                Con más de <span className="text-brand-amber font-semibold">91,000 seguidores en Instagram</span> y <span className="text-brand-amber font-semibold">2.8 millones en TikTok</span>, Crypto Lucho es uno de los creadores cripto más influyentes de Latinoamérica.
+                Con más de{" "}
+                <span className="text-brand-amber font-semibold">
+                  91,000 seguidores en Instagram
+                </span>{" "}
+                y{" "}
+                <span className="text-brand-amber font-semibold">
+                  2.8 millones en TikTok
+                </span>
+                , Crypto Lucho es uno de los creadores cripto más influyentes de
+                Latinoamérica.
               </p>
             </div>
             <p className="text-base text-gray-300 leading-relaxed font-aleo">
-              Desde Dubái, comparte contenido educativo y estratégico sobre Bitcoin, inversiones y tendencias del mercado. Forma parte del equipo fundador de CriptoUniversity como <span className="text-brand-amber font-semibold">líder regional</span>, ayudando a democratizar la educación financiera en español con su comunidad masiva y su visión global.
+              Desde Dubái, comparte contenido educativo y estratégico sobre
+              Bitcoin, inversiones y tendencias del mercado. Forma parte del
+              equipo fundador de CriptoUniversity como{" "}
+              <span className="text-brand-amber font-semibold">
+                líder regional
+              </span>
+              , ayudando a democratizar la educación financiera en español con
+              su comunidad masiva y su visión global.
             </p>
           </div>
         </motion.div>
@@ -378,10 +378,10 @@ const AboutSection: React.FC<AboutSectionProps> = ({
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6 }}
-          className="flex flex-col lg:flex-row-reverse items-center gap-12"
+          className="flex flex-col lg:flex-row-reverse lg:gap-12 gap-5 items-center justify-center px-4 sm:px-6 lg:px-12 xl:px-20 py-3"
         >
           {/* Crypto Juancho Card */}
-          <div className="flex-1 max-w-lg">
+          <div className="flex-1 max-w-xs lg:max-w-sm">
             <motion.div
               className="bg-white/5 backdrop-blur-sm rounded-3xl shadow-lg shadow-black/20 overflow-hidden transition-all duration-700 hover:scale-[1.02]"
               whileHover={{ y: -5 }}
@@ -401,19 +401,10 @@ const AboutSection: React.FC<AboutSectionProps> = ({
                     priority
                   />
                   <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/60 to-transparent" />
-                  <div className="absolute top-6 left-6">
-                    <h3 className="text-2xl font-oxanium font-bold text-white drop-shadow-lg">
+                  <div className="absolute bottom-4 left-4">
+                    <h3 className="text-xl font-oxanium font-bold text-white drop-shadow-lg">
                       Crypto Juancho
                     </h3>
-                    <p className="text-brand-amber font-electrolize">
-                      Mentor & Guía
-                    </p>
-                  </div>
-                  <div className="absolute top-6 right-6">
-                    <div className="bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-2">
-                      <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-                      <span className="text-xs text-white font-medium">Perú</span>
-                    </div>
                   </div>
                 </motion.div>
               </div>
@@ -449,11 +440,28 @@ const AboutSection: React.FC<AboutSectionProps> = ({
           <div className="flex-1 space-y-6">
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-brand-amber/20">
               <p className="text-lg text-gray-200 leading-relaxed font-aleo">
-                Con más de <span className="text-brand-amber font-semibold">1 millón de seguidores en TikTok</span> y <span className="text-brand-amber font-semibold">17,000 en Instagram</span>, Crypto Juancho es uno de los referentes cripto más potentes de Perú.
+                Con más de{" "}
+                <span className="text-brand-amber font-semibold">
+                  1 millón de seguidores en TikTok
+                </span>{" "}
+                y{" "}
+                <span className="text-brand-amber font-semibold">
+                  17,000 en Instagram
+                </span>
+                , Crypto Juancho es uno de los referentes cripto más potentes de
+                Perú.
               </p>
             </div>
             <p className="text-base text-gray-300 leading-relaxed font-aleo">
-              Con un estilo directo y práctico, enseña cómo generar ingresos con criptomonedas a miles de personas, y ha liderado academias con cientos de alumnos. Ahora es parte del núcleo de CriptoUniversity, como <span className="text-brand-amber font-semibold">mentor y guía</span>, comprometido con formar una nueva generación de inversores en toda la región.
+              Con un estilo directo y práctico, enseña cómo generar ingresos con
+              criptomonedas a miles de personas, y ha liderado academias con
+              cientos de alumnos. Ahora es parte del núcleo de CriptoUniversity,
+              como{" "}
+              <span className="text-brand-amber font-semibold">
+                mentor y guía
+              </span>
+              , comprometido con formar una nueva generación de inversores en
+              toda la región.
             </p>
           </div>
         </motion.div>
